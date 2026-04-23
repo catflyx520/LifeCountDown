@@ -1,27 +1,38 @@
-import React, { useCallback, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import { Eyebrow, SerifText, MonoText } from '../components/UI';
 import { theme, fonts } from '../theme';
 import { loadUser } from '../storage';
 import { useT } from '../i18n';
+import { db } from '../firebase';
 
-const FIGURES = [
-  { name: 'Van Gogh',        died: 37, note: 'painted The Starry Night at 36' },
-  { name: 'Mozart',          died: 35, note: 'wrote 600+ works before his body gave out' },
-  { name: 'Frida Kahlo',     died: 47, note: 'painted through chronic pain for 30 years' },
-  { name: 'Bruce Lee',       died: 32, note: 'redefined cinema, kung fu, and charisma' },
-  { name: 'Marcus Aurelius', died: 58, note: 'wrote Meditations — probably to himself' },
-  { name: 'Marie Curie',     died: 66, note: 'two Nobels, one in physics, one in chemistry' },
-  { name: 'Steve Jobs',      died: 56, note: 'changed how we carry our lives around' },
-  { name: 'Einstein',        died: 76, note: 'spent the last 30 years chasing a unified theory' },
-];
+type Figure = {
+  id: string;
+  name: string;
+  died_age: number;
+  note: { en: string; zh: string };
+  field: string;
+};
 
 export default function FiguresScreen() {
   const insets = useSafeAreaInsets();
-  const { s } = useT();
+  const { s, lang } = useT();
   const [age, setAge] = useState(28);
+  const [figures, setFigures] = useState<Figure[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getDocs(query(collection(db, 'figures'), where('active', '==', true)))
+      .then(snap => {
+        const data = snap.docs.map(d => ({ id: d.id, ...d.data() } as Figure));
+        data.sort((a, b) => a.died_age - b.died_age);
+        setFigures(data);
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
   useFocusEffect(useCallback(() => {
     loadUser().then(u => setAge(u.age));
@@ -36,32 +47,36 @@ export default function FiguresScreen() {
       <Eyebrow style={{ marginBottom: 8 }}>{s.figuresTitle}</Eyebrow>
       <SerifText size={28} style={{ marginBottom: 20 }}>{s.figuresSubtitle}</SerifText>
 
-      <View style={{ gap: 8 }}>
-        {FIGURES.map((f, i) => {
-          const outlived = age > f.died;
-          const ratio = Math.min(1, age / f.died);
-          return (
-            <View key={i} style={[styles.card, outlived && styles.cardAccent]}>
-              {/* progress bar at bottom */}
-              <View style={[styles.ratioBar, {
-                width: `${ratio * 100}%`,
-                backgroundColor: outlived ? theme.accent : theme.muted,
-                opacity: outlived ? 0.9 : 0.4,
-              }]} />
-
-              <View style={styles.row}>
-                <Text style={styles.name}>{f.name}</Text>
-                <Text style={[styles.badge, { color: outlived ? theme.accent : theme.muted }]}>
-                  {outlived
-                    ? `+${age - f.died} ${s.yrs} ${s.outlived}`
-                    : `${f.died - age} ${s.yrs} ${s.toLive}`}
+      {loading ? (
+        <ActivityIndicator color={theme.accent} style={{ marginTop: 40 }} />
+      ) : (
+        <View style={{ gap: 8 }}>
+          {figures.map(f => {
+            const outlived = age > f.died_age;
+            const ratio = Math.min(1, age / f.died_age);
+            return (
+              <View key={f.id} style={[styles.card, outlived && styles.cardAccent]}>
+                <View style={[styles.ratioBar, {
+                  width: `${ratio * 100}%`,
+                  backgroundColor: outlived ? theme.accent : theme.muted,
+                  opacity: outlived ? 0.9 : 0.4,
+                }]} />
+                <View style={styles.row}>
+                  <Text style={styles.name}>{f.name}</Text>
+                  <Text style={[styles.badge, { color: outlived ? theme.accent : theme.muted }]}>
+                    {outlived
+                      ? `+${age - f.died_age} ${s.yrs} ${s.outlived}`
+                      : `${f.died_age - age} ${s.yrs} ${s.toLive}`}
+                  </Text>
+                </View>
+                <Text style={styles.note}>
+                  died at {f.died_age} — {lang === 'zh' ? f.note.zh : f.note.en}
                 </Text>
               </View>
-              <Text style={styles.note}>died at {f.died} — {f.note}</Text>
-            </View>
-          );
-        })}
-      </View>
+            );
+          })}
+        </View>
+      )}
     </ScrollView>
   );
 }

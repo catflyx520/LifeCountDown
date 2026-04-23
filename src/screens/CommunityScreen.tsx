@@ -1,11 +1,13 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import { Eyebrow, SerifText, Card, MonoText } from '../components/UI';
 import { theme, fonts } from '../theme';
 import { loadUser } from '../storage';
 import { useT } from '../i18n';
+import { db } from '../firebase';
 
 const COHORT = [
   { label: 'avg life expectancy', value: 79, unit: 'yrs', note: 'global average 2024' },
@@ -21,17 +23,23 @@ const STREAKS = [
   { pct: 12, label: 'changed their target age' },
 ];
 
-const ANON_LETTERS = [
-  { age: 34, preview: 'I keep thinking about my father. He was 54 when…' },
-  { age: 27, preview: "Some mornings I wonder if the things I'm chasing even matter\u2026" },
-  { age: 41, preview: 'My daughter asked me what I wanted to be remembered for…' },
-  { age: 29, preview: 'Three years ago I was afraid of exactly this number.' },
-];
+type Quote = {
+  id: string;
+  text: { en: string; zh: string };
+  author: string;
+  source: string | null;
+};
 
 export default function CommunityScreen() {
   const insets = useSafeAreaInsets();
-  const { s } = useT();
+  const { s, lang } = useT();
   const [age, setAge] = useState(28);
+  const [quotes, setQuotes] = useState<Quote[]>([]);
+
+  useEffect(() => {
+    getDocs(query(collection(db, 'quotes'), where('active', '==', true)))
+      .then(snap => setQuotes(snap.docs.map(d => ({ id: d.id, ...d.data() } as Quote))));
+  }, []);
 
   useFocusEffect(useCallback(() => {
     loadUser().then(u => setAge(u.age));
@@ -79,18 +87,24 @@ export default function CommunityScreen() {
         ))}
       </Card>
 
-      {/* anon letters */}
-      <Eyebrow style={{ marginBottom: 10 }}>{s.recentCapsules}</Eyebrow>
-      <View style={{ gap: 8 }}>
-        {ANON_LETTERS.map((l, i) => (
-          <View key={i} style={styles.letterCard}>
-            <Eyebrow style={{ color: theme.muted, marginBottom: 6 }}>age {l.age}</Eyebrow>
-            <Text style={styles.letterText}>"{l.preview}"</Text>
+      {/* quotes from Firestore */}
+      {quotes.length > 0 && (
+        <>
+          <Eyebrow style={{ marginBottom: 10 }}>words to carry</Eyebrow>
+          <View style={{ gap: 8 }}>
+            {quotes.map(q => (
+              <View key={q.id} style={styles.quoteCard}>
+                <Text style={styles.quoteText}>
+                  "{lang === 'zh' ? q.text.zh : q.text.en}"
+                </Text>
+                <MonoText style={styles.quoteAuthor}>
+                  — {q.author}{q.source ? `, ${q.source}` : ''}
+                </MonoText>
+              </View>
+            ))}
           </View>
-        ))}
-      </View>
-
-      <MonoText style={{ textAlign: 'center', marginTop: 24, fontSize: 9 }}>{s.mockPreview}</MonoText>
+        </>
+      )}
     </ScrollView>
   );
 }
@@ -103,11 +117,12 @@ const styles = StyleSheet.create({
   streakLabel: { fontFamily: fonts.body, fontSize: 12, color: theme.fg },
   bar: { height: 2, backgroundColor: theme.border, borderRadius: 2, overflow: 'hidden' },
   barFill: { height: '100%', backgroundColor: theme.accent, borderRadius: 2 },
-  letterCard: {
+  quoteCard: {
     padding: 14, borderRadius: 12,
     backgroundColor: theme.surface, borderWidth: 1, borderColor: theme.border,
   },
-  letterText: {
-    fontFamily: fonts.serifItalic, fontSize: 14, color: theme.fg, lineHeight: 20,
+  quoteText: {
+    fontFamily: fonts.serifItalic, fontSize: 14, color: theme.fg, lineHeight: 20, marginBottom: 8,
   },
+  quoteAuthor: { fontSize: 9, color: theme.muted },
 });
