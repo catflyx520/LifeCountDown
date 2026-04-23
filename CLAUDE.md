@@ -2,6 +2,15 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Session continuity (IMPORTANT — follow every session)
+
+**At the start of every session:** Read `docs/context.md` immediately. It contains the current development state, what's done, and what's next. Do not wait for the user to ask.
+
+**At the end of every session** (when the user says they're done, switching machines, or wrapping up): Update `docs/context.md` to reflect what was accomplished and what comes next, then run:
+```bash
+git add docs/context.md && git commit -m "docs: update context" && git push
+```
+
 ## Commands
 
 ```bash
