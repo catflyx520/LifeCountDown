@@ -1,40 +1,34 @@
 # Development Context
 
-> Paste this file to Claude at the start of a new session to resume where we left off.
+> Claude reads this automatically at session start. Last updated: 2026-04-22.
 
 ## Project
 
-React Native / Expo life-countdown app with terracotta theme. Full onboarding + all screens are complete and working.
+React Native / Expo life-countdown app with terracotta theme. Full onboarding + all screens complete and working.
 
-## What's done (fully built)
+## What's done
 
 - Complete onboarding flow: Age → Mode → Manual or AI Quiz → Result → Main
 - All 5 tabs: Dashboard, Figures, Capsule, Community, Settings
 - AnimatedHourglass SVG component
-- AI integration via Gemini (`gemini-2.5-flash`) in QuizScreen — returns targetAge, confidence, feedback
-- i18n support (zh/en)
+- AI integration via Gemini (`gemini-2.5-flash`) in QuizScreen
+- i18n support (zh/en) via `useT()` hook which returns `{ s, lang, setLang }`
 - AsyncStorage-based local state (`@lifecountdown/user`)
-- `@anthropic-ai/sdk` is in dependencies but not yet wired up anywhere (future use)
+- Firebase client SDK installed (`firebase` package), initialized in `src/firebase.ts`
+- Firestore seeded: 13 quotes, 12 figures, app_config/global
+- **FiguresScreen**: live Firestore data, bilingual notes, sorted by died_age
+- **CommunityScreen**: COHORT/STREAKS still static mock; quotes section now live from Firestore
 
-## What's in progress — Firebase integration
+## Firebase setup
 
-- `firebase-admin` added as devDependency in `package.json`
-- `scripts/seed.js` — seeds Firestore `quotes` collection with bilingual stoic quotes (en/zh), fields: text{en,zh}, author, source, type, tags, active, weight
-- `scripts/seed-users.js` — seeds Firestore `users` collection with a `_template` document structure for future real user sign-ups
-- `serviceAccount.json` is gitignored (credentials file, never committed)
-
-## CommunityScreen current state
-
-All data is **hardcoded mock** right now:
-- `COHORT` — static stats (avg life expectancy, sleep, screen time, exercise)
-- `STREAKS` — fake percentages (94%, 61%, 38%, 12%)
-- `ANON_LETTERS` — 4 hardcoded fake capsule previews
-- Footer shows "mock preview" note
+- `src/firebase.ts` — initializes app from `EXPO_PUBLIC_FIREBASE_*` env vars, exports `db`
+- `.env` has all Firebase keys (gitignored)
+- `serviceAccount.json` in project root (gitignored) — used only for seed scripts
+- Seed scripts: `node scripts/seed.js` (quotes + figures), `node scripts/seed-users.js` (users template)
 
 ## What to do next
 
-1. Get `serviceAccount.json` from Firebase console and place it in project root (gitignored)
-2. Run `node scripts/seed.js` to populate Firestore quotes collection
-3. Run `node scripts/seed-users.js` to create users collection template
-4. Wire CommunityScreen to real Firestore data — replace hardcoded arrays with live queries
-5. Decide: add Firebase Auth for real user accounts, or keep anonymous?
+1. Test FiguresScreen and CommunityScreen on device/emulator with `npx expo start --clear`
+2. Decide on Community STREAKS and ANON_LETTERS: replace with real user aggregate data, or keep mock until users exist?
+3. Decide: add Firebase Auth for real user accounts?
+4. `@anthropic-ai/sdk` is in dependencies but not wired up — future use TBD
