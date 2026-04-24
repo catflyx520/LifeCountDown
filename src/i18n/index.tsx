@@ -116,6 +116,38 @@ const en = {
   grainLegend: 'one grain ≈ one day · running in real time',
   back: '← back',
 
+  // Dashboard quotes
+  dashQuotes: [
+    { text: 'The unexamined life is not worth living.', author: 'Socrates' },
+    { text: 'Memento mori. Memento vivere.', author: 'Anon' },
+    { text: 'You could leave life right now. Let that determine what you do.', author: 'Marcus Aurelius' },
+    { text: 'Every sunrise costs you one.', author: 'D/C' },
+  ],
+
+  // Capsule unlock options
+  unlockOptions: [
+    { label: '30 days',  days: 30 },
+    { label: '1 year',   days: 365 },
+    { label: '5 years',  days: 1825 },
+    { label: '10 years', days: 3650 },
+  ],
+  daysShort: (n: number) => `${n}d`,
+
+  // Community
+  wordsToCarry: 'words to carry',
+  cohort: [
+    { label: 'avg life expectancy', value: 79, unit: 'yrs', note: 'global average 2024' },
+    { label: 'sleep / night',       value: 6.8, unit: 'hrs', note: 'adults in your age group' },
+    { label: 'screen time / day',   value: 7.3, unit: 'hrs', note: 'us adults average' },
+    { label: 'exercise / week',     value: 1.4, unit: 'days', note: 'meet minimum guidelines' },
+  ],
+  streaks: [
+    { pct: 94, label: 'checked in this week' },
+    { pct: 61, label: 'opened app daily' },
+    { pct: 38, label: 'wrote a capsule' },
+    { pct: 12, label: 'changed their target age' },
+  ],
+
   // Figures
   figuresTitle: 'Historical Figures',
   figuresSubtitle: 'How do you compare?',
@@ -281,6 +313,35 @@ const zh: typeof en = {
   grainsLeft: (n) => `还剩 ${n} 粒沙。`,
   grainLegend: '一粒沙 ≈ 一天 · 实时运行',
   back: '← 返回',
+
+  dashQuotes: [
+    { text: '未经审视的人生不值得过。', author: '苏格拉底' },
+    { text: '记住你终将死去。记住你还活着。', author: '佚名' },
+    { text: '你随时可能离开这个世界。让这个念头决定你的所作所为。', author: '马可·奥勒留' },
+    { text: '每一次日出，都让你少了一个。', author: 'D/C' },
+  ],
+
+  unlockOptions: [
+    { label: '30 天',  days: 30 },
+    { label: '1 年',   days: 365 },
+    { label: '5 年',  days: 1825 },
+    { label: '10 年', days: 3650 },
+  ],
+  daysShort: (n: number) => `${n}天`,
+
+  wordsToCarry: '铭记于心',
+  cohort: [
+    { label: '平均预期寿命', value: 79,  unit: '岁',  note: '全球平均值 2024' },
+    { label: '每晚睡眠',     value: 6.8, unit: '小时', note: '同龄成年人' },
+    { label: '每日屏幕时间', value: 7.3, unit: '小时', note: '美国成年人平均值' },
+    { label: '每周运动',     value: 1.4, unit: '天',   note: '达到最低建议标准' },
+  ],
+  streaks: [
+    { pct: 94, label: '本周打开了 App' },
+    { pct: 61, label: '每天打开 App' },
+    { pct: 38, label: '写了一封胶囊信' },
+    { pct: 12, label: '更改了目标年龄' },
+  ],
 
   figuresTitle: '历史人物',
   figuresSubtitle: '与他们相比如何？',

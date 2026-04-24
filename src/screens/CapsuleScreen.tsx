@@ -10,12 +10,6 @@ import { loadUser, saveUser } from '../storage';
 import { Capsule } from '../types';
 import { useT } from '../i18n';
 
-const UNLOCK_OPTIONS = [
-  { label: '30 days',  days: 30 },
-  { label: '1 year',   days: 365 },
-  { label: '5 years',  days: 1825 },
-  { label: '10 years', days: 3650 },
-];
 
 export default function CapsuleScreen() {
   const insets = useSafeAreaInsets();
@@ -72,7 +66,7 @@ export default function CapsuleScreen() {
 
         {/* unlock options */}
         <View style={styles.unlockRow}>
-          {UNLOCK_OPTIONS.map(o => (
+          {s.unlockOptions.map(o => (
             <TouchableOpacity
               key={o.days}
               onPress={() => setUnlockDays(o.days)}
@@ -119,7 +113,7 @@ export default function CapsuleScreen() {
                   </Text>
                 </View>
                 <Eyebrow style={{ color: unlocked ? theme.accent : theme.muted }}>
-                  {unlocked ? s.unlockedOn : `${s.unlockIn} ${daysLeft}d`}
+                  {unlocked ? s.unlockedOn : `${s.unlockIn} ${s.daysShort(daysLeft)}`}
                 </Eyebrow>
               </View>
               <MonoText style={{ fontSize: 9 }}>{unlocked ? s.tapToRead : s.locked}</MonoText>

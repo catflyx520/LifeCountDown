@@ -10,12 +10,6 @@ import { loadUser, ageFromBirthdate, daysUntilBirthday } from '../storage';
 import { UserData } from '../types';
 import { useT } from '../i18n';
 
-const QUOTES = [
-  { text: "The unexamined life is not worth living.", author: "Socrates" },
-  { text: "Memento mori. Memento vivere.", author: "Anon" },
-  { text: "You could leave life right now. Let that determine what you do.", author: "Marcus Aurelius" },
-  { text: "Every sunrise costs you one.", author: "D/C" },
-];
 
 function fmt(n: number) {
   return n.toLocaleString('en-US');
@@ -41,6 +35,7 @@ function DashHourglass() {
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const { s } = useT();
+
   const [user, setUser] = useState<UserData | null>(null);
   const countdown = useCountdown();
   const navigation = useNavigation<any>();
@@ -58,7 +53,7 @@ export default function DashboardScreen() {
   const elapsed = user.age * 365;
   const pct = Math.min(100, (elapsed / totalDays) * 100);
   const dayOfYear = Math.ceil((Date.now() - new Date(new Date().getFullYear(), 0, 1).getTime()) / 86400000);
-  const quote = QUOTES[days % QUOTES.length];
+  const quote = s.dashQuotes[days % s.dashQuotes.length];
 
   const displayAge = user.birthdate ? ageFromBirthdate(user.birthdate) : user.age;
   const nextBday = user.birthdate ? daysUntilBirthday(user.birthdate) : null;

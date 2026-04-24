@@ -9,19 +9,6 @@ import { loadUser } from '../storage';
 import { useT } from '../i18n';
 import { db } from '../firebase';
 
-const COHORT = [
-  { label: 'avg life expectancy', value: 79, unit: 'yrs', note: 'global average 2024' },
-  { label: 'sleep / night', value: 6.8, unit: 'hrs', note: 'adults in your age group' },
-  { label: 'screen time / day', value: 7.3, unit: 'hrs', note: 'us adults average' },
-  { label: 'exercise / week', value: 1.4, unit: 'days', note: 'meet minimum guidelines' },
-];
-
-const STREAKS = [
-  { pct: 94, label: 'checked in this week' },
-  { pct: 61, label: 'opened app daily' },
-  { pct: 38, label: 'wrote a capsule' },
-  { pct: 12, label: 'changed their target age' },
-];
 
 type Quote = {
   id: string;
@@ -57,7 +44,7 @@ export default function CommunityScreen() {
       {/* cohort compare */}
       <Eyebrow style={{ marginBottom: 10 }}>{s.cohortLabel(age)}</Eyebrow>
       <View style={{ gap: 8, marginBottom: 20 }}>
-        {COHORT.map((c, i) => (
+        {s.cohort.map((c, i) => (
           <Card key={i} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <View style={{ flex: 1 }}>
               <Eyebrow style={{ fontSize: 9, marginBottom: 4 }}>{c.label}</Eyebrow>
@@ -74,7 +61,7 @@ export default function CommunityScreen() {
       {/* activity streaks */}
       <Eyebrow style={{ marginBottom: 10 }}>{s.thisWeek((1024).toLocaleString())}</Eyebrow>
       <Card style={{ marginBottom: 20, gap: 14 }}>
-        {STREAKS.map((streak, i) => (
+        {s.streaks.map((streak, i) => (
           <View key={i}>
             <View style={styles.streakRow}>
               <Text style={styles.streakLabel}>{streak.label}</Text>
@@ -90,7 +77,7 @@ export default function CommunityScreen() {
       {/* quotes from Firestore */}
       {quotes.length > 0 && (
         <>
-          <Eyebrow style={{ marginBottom: 10 }}>words to carry</Eyebrow>
+          <Eyebrow style={{ marginBottom: 10 }}>{s.wordsToCarry}</Eyebrow>
           <View style={{ gap: 8 }}>
             {quotes.map(q => (
               <View key={q.id} style={styles.quoteCard}>
