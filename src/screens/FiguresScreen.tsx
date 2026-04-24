@@ -12,6 +12,7 @@ import { db } from '../firebase';
 type Figure = {
   id: string;
   name: string;
+  name_zh?: string;
   died_age: number;
   note: { en: string; zh: string };
   field: string;
@@ -62,7 +63,7 @@ export default function FiguresScreen() {
                   opacity: outlived ? 0.9 : 0.4,
                 }]} />
                 <View style={styles.row}>
-                  <Text style={styles.name}>{f.name}</Text>
+                  <Text style={styles.name}>{lang === 'zh' && f.name_zh ? f.name_zh : f.name}</Text>
                   <Text style={[styles.badge, { color: outlived ? theme.accent : theme.muted }]}>
                     {outlived
                       ? `+${age - f.died_age} ${s.yrs} ${s.outlived}`
@@ -70,7 +71,7 @@ export default function FiguresScreen() {
                   </Text>
                 </View>
                 <Text style={styles.note}>
-                  died at {f.died_age} — {lang === 'zh' ? f.note.zh : f.note.en}
+                  {s.passedAt(f.died_age)} — {lang === 'zh' ? f.note.zh : f.note.en}
                 </Text>
               </View>
             );

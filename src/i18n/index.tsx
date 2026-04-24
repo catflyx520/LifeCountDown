@@ -121,6 +121,7 @@ const en = {
   figuresSubtitle: 'How do you compare?',
   outlived: 'outlived',
   toLive: 'to live',
+  passedAt: (age: number) => `passed away at ${age}`,
 
   // Capsule
   capsuleTitle: 'Time Capsule',
@@ -285,6 +286,7 @@ const zh: typeof en = {
   figuresSubtitle: '与他们相比如何？',
   outlived: '已超越',
   toLive: '还差',
+  passedAt: (age: number) => `于 ${age} 岁辞世`,
 
   capsuleTitle: '时间胶囊',
   capsuleSubtitle: '写一封信给未来的自己。',

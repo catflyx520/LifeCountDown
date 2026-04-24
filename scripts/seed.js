@@ -173,6 +173,7 @@ const QUOTES = [
 const FIGURES = [
   {
     name: 'Van Gogh',
+    name_zh: '梵高',
     field: 'art',
     born_year: 1853,
     died_year: 1890,
@@ -187,6 +188,7 @@ const FIGURES = [
   },
   {
     name: 'Mozart',
+    name_zh: '莫扎特',
     field: 'music',
     born_year: 1756,
     died_year: 1791,
@@ -201,6 +203,7 @@ const FIGURES = [
   },
   {
     name: 'Frida Kahlo',
+    name_zh: '弗里达·卡罗',
     field: 'art',
     born_year: 1907,
     died_year: 1954,
@@ -215,6 +218,7 @@ const FIGURES = [
   },
   {
     name: 'Bruce Lee',
+    name_zh: '李小龙',
     field: 'martial arts',
     born_year: 1940,
     died_year: 1973,
@@ -229,6 +233,7 @@ const FIGURES = [
   },
   {
     name: 'Marcus Aurelius',
+    name_zh: '马可·奥勒留',
     field: 'philosophy',
     born_year: 121,
     died_year: 180,
@@ -243,6 +248,7 @@ const FIGURES = [
   },
   {
     name: 'Marie Curie',
+    name_zh: '玛丽·居里',
     field: 'science',
     born_year: 1867,
     died_year: 1934,
@@ -257,6 +263,7 @@ const FIGURES = [
   },
   {
     name: 'Steve Jobs',
+    name_zh: '史蒂夫·乔布斯',
     field: 'technology',
     born_year: 1955,
     died_year: 2011,
@@ -271,6 +278,7 @@ const FIGURES = [
   },
   {
     name: 'Einstein',
+    name_zh: '爱因斯坦',
     field: 'science',
     born_year: 1879,
     died_year: 1955,
@@ -285,6 +293,7 @@ const FIGURES = [
   },
   {
     name: 'Nikola Tesla',
+    name_zh: '尼古拉·特斯拉',
     field: 'science',
     born_year: 1856,
     died_year: 1943,
@@ -299,6 +308,7 @@ const FIGURES = [
   },
   {
     name: 'Kobe Bryant',
+    name_zh: '科比·布莱恩特',
     field: 'sports',
     born_year: 1978,
     died_year: 2020,
@@ -313,6 +323,7 @@ const FIGURES = [
   },
   {
     name: 'Seneca',
+    name_zh: '塞涅卡',
     field: 'philosophy',
     born_year: -4,
     died_year: 65,
@@ -327,6 +338,7 @@ const FIGURES = [
   },
   {
     name: 'David Bowie',
+    name_zh: '大卫·鲍伊',
     field: 'music',
     born_year: 1947,
     died_year: 2016,
