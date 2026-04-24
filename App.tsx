@@ -47,7 +47,7 @@ export default function App() {
         <LanguageProvider>
           {fontsLoaded && <Navigation />}
           {splashVisible && (
-            <Animated.View style={[StyleSheet.absoluteFill, { opacity: splashOpacity }]}>
+            <Animated.View style={[StyleSheet.absoluteFill, { opacity: splashOpacity, backgroundColor: '#eadfc3' }]}>
               <AppSplash />
             </Animated.View>
           )}
