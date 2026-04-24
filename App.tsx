@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated, StyleSheet } from 'react-native';
 import {
   useFonts,
   InstrumentSerif_400Regular,
@@ -14,7 +14,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Navigation from './src/navigation';
 import { LanguageProvider } from './src/i18n';
-import { theme } from './src/theme';
+import AppSplash from './src/components/AppSplash';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -26,19 +26,31 @@ export default function App() {
     JetBrainsMono_500Medium,
   });
 
-  if (!fontsLoaded) {
-    return (
-      <View style={{ flex: 1, backgroundColor: theme.bg, alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator color={theme.accent} />
-      </View>
-    );
-  }
+  const [splashVisible, setSplashVisible] = useState(true);
+  const splashOpacity = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (!fontsLoaded) return;
+    const t = setTimeout(() => {
+      Animated.timing(splashOpacity, {
+        toValue: 0,
+        duration: 600,
+        useNativeDriver: true,
+      }).start(() => setSplashVisible(false));
+    }, 1500);
+    return () => clearTimeout(t);
+  }, [fontsLoaded]);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <LanguageProvider>
-          <Navigation />
+          {fontsLoaded && <Navigation />}
+          {splashVisible && (
+            <Animated.View style={[StyleSheet.absoluteFill, { opacity: splashOpacity }]}>
+              <AppSplash />
+            </Animated.View>
+          )}
         </LanguageProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
