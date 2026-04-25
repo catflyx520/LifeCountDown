@@ -203,6 +203,14 @@ const en = {
   aiMode: (confidence: number) => `AI · ${confidence}% confidence`,
   manualMode: 'Manual',
 
+  // Notifications
+  notifReminder: 'Daily Reminder',
+  notifReminderNote: 'A daily nudge with your life stats & a quote',
+  notifTime: 'Reminder time',
+  notifEnabled: 'On',
+  notifDisabled: 'Off',
+  notifPermissionDenied: 'Please enable notifications in your device settings.',
+
   // Nav tabs
   tabDashboard: 'Home',
   tabFigures: 'Figures',
@@ -394,6 +402,14 @@ const zh: typeof en = {
   aiMode: (confidence) => `AI · 置信度 ${confidence}%`,
   manualMode: '手动',
 
+  // Notifications
+  notifReminder: '每日提醒',
+  notifReminderNote: '每天推送人生数据与一句格言',
+  notifTime: '提醒时间',
+  notifEnabled: '已开启',
+  notifDisabled: '已关闭',
+  notifPermissionDenied: '请在设备设置中开启通知权限。',
+
   tabDashboard: '主页',
   tabFigures: '人物',
   tabCapsule: '胶囊',
@@ -402,6 +418,8 @@ const zh: typeof en = {
 };
 
 export type Strings = typeof en;
+
+export const rawDashQuotes = { en: en.dashQuotes, zh: zh.dashQuotes };
 
 export const LANGUAGES: { code: Lang; flag: string; label: string }[] = [
   { code: 'en', flag: '🇺🇸', label: 'English' },

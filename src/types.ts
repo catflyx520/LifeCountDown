@@ -18,6 +18,8 @@ export interface UserData {
   name: string;
   capsules: Capsule[];
   createdAt: string;          // ISO date string
+  notificationsEnabled: boolean;
+  notifyHour: number;
 }
 
 export type RootStackParamList = {

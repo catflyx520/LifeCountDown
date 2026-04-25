@@ -6,7 +6,7 @@ import { theme, fonts } from '../theme';
 import { Eyebrow, SerifText, Card, MonoText } from '../components/UI';
 import AnimatedHourglass from '../components/AnimatedHourglass';
 import { useCountdown } from '../hooks/useCountdown';
-import { loadUser, ageFromBirthdate, daysUntilBirthday } from '../storage';
+import { loadUser, ageFromBirthdate, daysUntilBirthday, getDailyQuoteIndex } from '../storage';
 import { UserData } from '../types';
 import { useT } from '../i18n';
 
@@ -37,8 +37,13 @@ export default function DashboardScreen() {
   const { s } = useT();
 
   const [user, setUser] = useState<UserData | null>(null);
+  const [quoteIndex, setQuoteIndex] = useState(0);
   const countdown = useCountdown();
   const navigation = useNavigation<any>();
+
+  useEffect(() => {
+    getDailyQuoteIndex(s.dashQuotes.length).then(setQuoteIndex);
+  }, []);
 
   const reload = useCallback(() => {
     loadUser().then(setUser);
@@ -53,7 +58,7 @@ export default function DashboardScreen() {
   const elapsed = user.age * 365;
   const pct = Math.min(100, (elapsed / totalDays) * 100);
   const dayOfYear = Math.ceil((Date.now() - new Date(new Date().getFullYear(), 0, 1).getTime()) / 86400000);
-  const quote = s.dashQuotes[days % s.dashQuotes.length];
+  const quote = s.dashQuotes[quoteIndex];
 
   const displayAge = user.birthdate ? ageFromBirthdate(user.birthdate) : user.age;
   const nextBday = user.birthdate ? daysUntilBirthday(user.birthdate) : null;

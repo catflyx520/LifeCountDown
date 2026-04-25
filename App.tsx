@@ -15,6 +15,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Navigation from './src/navigation';
 import { LanguageProvider } from './src/i18n';
 import AppSplash from './src/components/AppSplash';
+import { rescheduleIfEnabled } from './src/notifications';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -31,6 +32,7 @@ export default function App() {
 
   useEffect(() => {
     if (!fontsLoaded) return;
+    rescheduleIfEnabled();
     const t = setTimeout(() => {
       Animated.timing(splashOpacity, {
         toValue: 0,

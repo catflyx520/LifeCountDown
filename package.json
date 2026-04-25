@@ -21,6 +21,7 @@
     "expo": "~54.0.33",
     "expo-font": "~13.3.1",
     "expo-haptics": "~14.0.1",
+    "expo-notifications": "~0.32.16",
     "expo-status-bar": "~3.0.9",
     "firebase": "^12.12.1",
     "react": "19.1.0",

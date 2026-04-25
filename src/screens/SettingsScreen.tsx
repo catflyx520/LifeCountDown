@@ -9,6 +9,7 @@ import { theme, fonts } from '../theme';
 import { loadUser, saveUser, clearUser, ageFromBirthdate } from '../storage';
 import { UserData } from '../types';
 import { useT } from '../i18n';
+import { requestPermission, cancelDaily, rescheduleIfEnabled } from '../notifications';
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
@@ -17,6 +18,7 @@ export default function SettingsScreen() {
   const [user, setUser] = useState<UserData | null>(null);
   const [nameInput, setNameInput] = useState('');
   const [showResetModal, setShowResetModal] = useState(false);
+  const [permissionDenied, setPermissionDenied] = useState(false);
 
   const reload = useCallback(() => {
     loadUser().then(u => { setUser(u); setNameInput(u.name ?? ''); });
@@ -35,6 +37,28 @@ export default function SettingsScreen() {
   const restart = async () => {
     await clearUser();
     navigation.reset({ index: 0, routes: [{ name: 'Onboarding' }] });
+  };
+
+  const toggleNotifications = async () => {
+    if (!user) return;
+    if (user.notificationsEnabled) {
+      await saveUser({ notificationsEnabled: false });
+      await cancelDaily();
+      setUser(u => u ? { ...u, notificationsEnabled: false } : u);
+    } else {
+      const granted = await requestPermission();
+      if (!granted) { setPermissionDenied(true); return; }
+      setPermissionDenied(false);
+      await saveUser({ notificationsEnabled: true });
+      await rescheduleIfEnabled();
+      setUser(u => u ? { ...u, notificationsEnabled: true } : u);
+    }
+  };
+
+  const changeHour = async (h: number) => {
+    await saveUser({ notifyHour: h });
+    await rescheduleIfEnabled();
+    setUser(u => u ? { ...u, notifyHour: h } : u);
   };
 
   const switchMode = () => {
@@ -142,6 +166,49 @@ export default function SettingsScreen() {
         </View>
       </Card>
 
+      {/* notifications */}
+      <Card style={{ marginBottom: 12 }}>
+        <View style={styles.notifRow}>
+          <View style={{ flex: 1 }}>
+            <Eyebrow style={{ marginBottom: 4 }}>{s.notifReminder}</Eyebrow>
+            <MonoText style={{ fontSize: 9 }}>{s.notifReminderNote}</MonoText>
+          </View>
+          <TouchableOpacity
+            onPress={toggleNotifications}
+            style={[styles.toggleBtn, user.notificationsEnabled && styles.toggleBtnOn]}
+          >
+            <Text style={[styles.toggleText, user.notificationsEnabled && { color: theme.accentFg }]}>
+              {user.notificationsEnabled ? s.notifEnabled : s.notifDisabled}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {permissionDenied && (
+          <MonoText style={{ fontSize: 9, color: theme.accent, marginTop: 8 }}>
+            {s.notifPermissionDenied}
+          </MonoText>
+        )}
+
+        {user.notificationsEnabled && (
+          <View style={{ marginTop: 12 }}>
+            <Eyebrow style={{ marginBottom: 8 }}>{s.notifTime}</Eyebrow>
+            <View style={styles.hourRow}>
+              {[7, 8, 9, 10, 12, 20, 21].map(h => (
+                <TouchableOpacity
+                  key={h}
+                  onPress={() => changeHour(h)}
+                  style={[styles.hourBtn, (user.notifyHour ?? 9) === h && styles.hourBtnActive]}
+                >
+                  <Text style={[styles.hourText, (user.notifyHour ?? 9) === h && { color: theme.accentFg }]}>
+                    {h}:00
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        )}
+      </Card>
+
       {/* danger zone */}
       <View style={styles.divider} />
       <Eyebrow style={{ marginBottom: 10, color: theme.muted }}>{s.dangerZone}</Eyebrow>
@@ -204,6 +271,20 @@ const styles = StyleSheet.create({
   langBtnText: { fontFamily: fonts.mono, fontSize: 10, letterSpacing: 1.5, color: theme.muted },
   langBtnTextActive: { color: theme.accentFg },
   divider: { height: 1, backgroundColor: theme.border, marginVertical: 20 },
+  notifRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  toggleBtn: {
+    paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8,
+    borderWidth: 1, borderColor: theme.border,
+  },
+  toggleBtnOn: { backgroundColor: theme.accent, borderColor: theme.accent },
+  toggleText: { fontFamily: fonts.mono, fontSize: 9, letterSpacing: 1, color: theme.muted },
+  hourRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  hourBtn: {
+    paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8,
+    borderWidth: 1, borderColor: theme.border,
+  },
+  hourBtnActive: { backgroundColor: theme.accent, borderColor: theme.accent },
+  hourText: { fontFamily: fonts.mono, fontSize: 9, letterSpacing: 0.5, color: theme.muted },
   resetBtn: {
     padding: 14, borderRadius: 12,
     borderWidth: 1, borderColor: '#b5533c44',

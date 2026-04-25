@@ -13,6 +13,8 @@ export const defaultUser: UserData = {
   name: '',
   capsules: [],
   createdAt: new Date().toISOString(),
+  notificationsEnabled: false,
+  notifyHour: 9,
 };
 
 export async function loadUser(): Promise<UserData> {
@@ -53,6 +55,22 @@ export function ageFromBirthdate(birthdate: string): number {
     (now.getMonth() === bd.getMonth() && now.getDate() >= bd.getDate());
   if (!hasBirthday) age--;
   return Math.max(0, age);
+}
+
+const QUOTE_KEY = '@lifecountdown/daily-quote';
+
+export async function getDailyQuoteIndex(total: number): Promise<number> {
+  const today = new Date().toISOString().slice(0, 10);
+  try {
+    const raw = await AsyncStorage.getItem(QUOTE_KEY);
+    if (raw) {
+      const { date, index } = JSON.parse(raw);
+      if (date === today && index < total) return index;
+    }
+  } catch {}
+  const index = Math.floor(Math.random() * total);
+  await AsyncStorage.setItem(QUOTE_KEY, JSON.stringify({ date: today, index }));
+  return index;
 }
 
 // Days until next birthday
