@@ -210,6 +210,7 @@ const en = {
   notifEnabled: 'On',
   notifDisabled: 'Off',
   notifPermissionDenied: 'Please enable notifications in your device settings.',
+  notifTest: 'Send test notification →',
 
   // Nav tabs
   tabDashboard: 'Home',
@@ -409,6 +410,7 @@ const zh: typeof en = {
   notifEnabled: '已开启',
   notifDisabled: '已关闭',
   notifPermissionDenied: '请在设备设置中开启通知权限。',
+  notifTest: '发送测试通知 →',
 
   tabDashboard: '主页',
   tabFigures: '人物',

@@ -9,7 +9,7 @@ import { theme, fonts } from '../theme';
 import { loadUser, saveUser, clearUser, ageFromBirthdate } from '../storage';
 import { UserData } from '../types';
 import { useT } from '../i18n';
-import { requestPermission, cancelDaily, rescheduleIfEnabled } from '../notifications';
+import { requestPermission, cancelDaily, rescheduleIfEnabled, sendTestNotification } from '../notifications';
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
@@ -191,6 +191,12 @@ export default function SettingsScreen() {
 
         {user.notificationsEnabled && (
           <View style={{ marginTop: 12 }}>
+            <TouchableOpacity
+              onPress={sendTestNotification}
+              style={[styles.actionBtn, { marginBottom: 12 }]}
+            >
+              <Text style={styles.actionBtnText}>{s.notifTest}</Text>
+            </TouchableOpacity>
             <Eyebrow style={{ marginBottom: 8 }}>{s.notifTime}</Eyebrow>
             <View style={styles.hourRow}>
               {[7, 8, 9, 10, 12, 20, 21].map(h => (
