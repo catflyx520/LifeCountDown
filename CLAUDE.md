@@ -12,6 +12,8 @@ git add docs/context.md && git commit -m "docs: update context" && git push
 ```
 Do this automatically — do not wait for the user to ask.
 
+**After every code change:** Run `npx expo start --clear` in the background to verify no runtime errors appear in the Metro bundler output. Check for red error screens or bundle failures before reporting the task as done. Do not wait for the user to ask.
+
 ## Commands
 
 ```bash
