@@ -3,25 +3,33 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { rawDashQuotes } from './i18n';
 import { getDailyQuoteIndex } from './storage';
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-  }),
-});
+try {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldShowBanner: true,
+      shouldShowList: true,
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+    }),
+  });
+} catch {}  // expo-notifications not available in Expo Go (SDK 53+)
 
 export async function requestPermission(): Promise<boolean> {
-  const { status: existing } = await Notifications.getPermissionsAsync();
-  if (existing === 'granted') return true;
-  const { status } = await Notifications.requestPermissionsAsync();
-  return status === 'granted';
+  try {
+    const { status: existing } = await Notifications.getPermissionsAsync();
+    if (existing === 'granted') return true;
+    const { status } = await Notifications.requestPermissionsAsync();
+    return status === 'granted';
+  } catch {
+    return false;
+  }
 }
 
 export async function cancelDaily(): Promise<void> {
-  await Notifications.cancelAllScheduledNotificationsAsync();
+  try {
+    await Notifications.cancelAllScheduledNotificationsAsync();
+  } catch {}
 }
 
 async function buildAndSchedule(
@@ -46,7 +54,7 @@ async function buildAndSchedule(
     : `${days.toLocaleString()} days left · ${pct}% of life\n~${years} yrs ${months} mo`;
 
   await Notifications.cancelAllScheduledNotificationsAsync();
-  await Notifications.scheduleNotificationAsync({
+  await Notifications.scheduleNotificationAsync({  // throws in Expo Go — caught by rescheduleIfEnabled
     content: { title, body: `${quoteStr}\n${statsStr}` },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.DAILY,
