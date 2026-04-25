@@ -1,6 +1,6 @@
 # Development Context
 
-> Claude reads this automatically at session start. Last updated: 2026-04-23.
+> Claude reads this automatically at session start. Last updated: 2026-04-25.
 
 ## Project
 
@@ -47,10 +47,13 @@ React Native / Expo life-countdown app with terracotta theme. Full onboarding + 
 - Hour picker: 7, 8, 9, 10, 12, 20, 21 — tapping reschedules immediately
 - Permission denied message shown if user rejects
 
+## Known Expo Go limitation
+
+`expo-notifications` local scheduled notifications do NOT work in Expo Go on Android (SDK 53+). All notification calls are wrapped in try-catch so the app doesn't crash — the Settings toggle UI works but notifications won't actually fire. To test notifications properly, a **development build** (`expo-dev-client`) is required.
+
 ## What to do next
 
-1. Test all screens on device — `npx expo start --clear`
-2. Test notifications: enable in Settings → wait / manually trigger
-3. Community STREAKS and cohort values — replace with real aggregate data once Firebase Auth + users exist
-4. Decide on Firebase Auth (real user accounts) vs staying anonymous
-5. `@anthropic-ai/sdk` in dependencies, not yet wired up
+1. Community STREAKS and cohort values — replace with real aggregate data once Firebase Auth + users exist
+2. Decide on Firebase Auth (real user accounts) vs staying anonymous
+3. `@anthropic-ai/sdk` in dependencies, not yet wired up
+4. To test notifications: build a dev build with `expo-dev-client`
