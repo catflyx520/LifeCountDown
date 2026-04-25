@@ -27,9 +27,30 @@ React Native / Expo life-countdown app with terracotta theme. Full onboarding + 
 - `serviceAccount.json` in project root (gitignored) — admin SDK only, for seed scripts
 - Firestore Security Rules: quotes/figures/app_config are read-only from client (update rules if needed)
 
+## Notifications (`src/notifications.ts`)
+
+- `expo-notifications` installed; plugin added to `app.json`
+- `rescheduleIfEnabled()` — reads user + lang from AsyncStorage, picks daily quote, schedules
+- `requestPermission()`, `cancelDaily()` also exported
+- `setNotificationHandler` called at module level (shows alert, no sound)
+- Notification content: quote + stats (days left, life %, yrs/mo remaining), bilingual
+- Trigger: `SchedulableTriggerInputTypes.DAILY` at user-selected hour (default 9:00)
+
+## Daily quote rotation (`src/storage.ts`)
+
+- `getDailyQuoteIndex(total)` — stores `{ date, index }` in `@lifecountdown/daily-quote`; picks new random index if date changes
+- DashboardScreen uses this instead of `days % quotes.length`
+
+## Settings screen notifications card
+
+- Toggle (Off/On) → requests permission on first enable
+- Hour picker: 7, 8, 9, 10, 12, 20, 21 — tapping reschedules immediately
+- Permission denied message shown if user rejects
+
 ## What to do next
 
 1. Test all screens on device — `npx expo start --clear`
-2. Community STREAKS and cohort values — replace with real aggregate data once Firebase Auth + users exist
-3. Decide on Firebase Auth (real user accounts) vs staying anonymous
-4. `@anthropic-ai/sdk` in dependencies, not yet wired up
+2. Test notifications: enable in Settings → wait / manually trigger
+3. Community STREAKS and cohort values — replace with real aggregate data once Firebase Auth + users exist
+4. Decide on Firebase Auth (real user accounts) vs staying anonymous
+5. `@anthropic-ai/sdk` in dependencies, not yet wired up
