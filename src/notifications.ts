@@ -1,7 +1,6 @@
 import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { rawDashQuotes } from './i18n';
-import { getDailyQuoteIndex } from './storage';
+import { buildDailyMessage } from './utils/dailyMessage';
 
 try {
   Notifications.setNotificationHandler({
@@ -34,28 +33,12 @@ export async function cancelDaily(): Promise<void> {
 
 async function buildAndSchedule(
   user: { daysLeft: number; age: number; targetAge: number; notifyHour: number },
-  quote: { text: string; author: string },
   lang: string,
 ): Promise<void> {
-  const days = user.daysLeft;
-  const totalDays = user.targetAge * 365;
-  const elapsed = user.age * 365;
-  const pct = Math.min(100, (elapsed / totalDays) * 100).toFixed(1);
-  const years = Math.floor(days / 365);
-  const months = Math.floor((days % 365) / 30.44);
-
-  const isZh = lang === 'zh';
-  const title = isZh ? '人生倒计时' : 'Life Countdown';
-  const quoteStr = isZh
-    ? `「${quote.text}」— ${quote.author}`
-    : `"${quote.text}" — ${quote.author}`;
-  const statsStr = isZh
-    ? `还剩 ${days.toLocaleString()} 天 · 人生进度 ${pct}%\n约 ${years} 年 ${months} 个月`
-    : `${days.toLocaleString()} days left · ${pct}% of life\n~${years} yrs ${months} mo`;
-
+  const body = buildDailyMessage(user, lang);
   await Notifications.cancelAllScheduledNotificationsAsync();
-  await Notifications.scheduleNotificationAsync({  // throws in Expo Go — caught by rescheduleIfEnabled
-    content: { title, body: `${quoteStr}\n${statsStr}` },
+  await Notifications.scheduleNotificationAsync({
+    content: { title: null, body },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.DAILY,
       hour: user.notifyHour ?? 9,
@@ -73,26 +56,9 @@ export async function sendTestNotification(): Promise<void> {
     if (!userRaw) return;
     const user = JSON.parse(userRaw);
     const lang = langRaw === 'zh' ? 'zh' : 'en';
-    const quotes = rawDashQuotes[lang];
-    const index = await getDailyQuoteIndex(quotes.length);
-    const quote = quotes[index];
-
-    const days = user.daysLeft ?? 0;
-    const totalDays = (user.targetAge ?? 80) * 365;
-    const elapsed = (user.age ?? 28) * 365;
-    const pct = Math.min(100, (elapsed / totalDays) * 100).toFixed(1);
-    const years = Math.floor(days / 365);
-    const months = Math.floor((days % 365) / 30.44);
-
-    const isZh = lang === 'zh';
-    const title = isZh ? '人生倒计时' : 'Life Countdown';
-    const quoteStr = isZh ? `「${quote.text}」— ${quote.author}` : `"${quote.text}" — ${quote.author}`;
-    const statsStr = isZh
-      ? `还剩 ${days.toLocaleString()} 天 · 人生进度 ${pct}%\n约 ${years} 年 ${months} 个月`
-      : `${days.toLocaleString()} days left · ${pct}% of life\n~${years} yrs ${months} mo`;
-
+    const body = buildDailyMessage(user, lang);
     await Notifications.scheduleNotificationAsync({
-      content: { title, body: `${quoteStr}\n${statsStr}` },
+      content: { title: null, body },
       trigger: { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds: 2 },
     });
   } catch {}
@@ -109,8 +75,6 @@ export async function rescheduleIfEnabled(): Promise<void> {
     if (!user.notificationsEnabled) return;
 
     const lang = langRaw === 'zh' ? 'zh' : 'en';
-    const quotes = rawDashQuotes[lang];
-    const index = await getDailyQuoteIndex(quotes.length);
-    await buildAndSchedule(user, quotes[index], lang);
+    await buildAndSchedule(user, lang);
   } catch {}
 }
