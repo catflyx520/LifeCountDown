@@ -1,6 +1,6 @@
 # Development Context
 
-> Claude reads this automatically at session start. Last updated: 2026-04-25.
+> Claude reads this automatically at session start. Last updated: 2026-04-25 (updated).
 
 ## Project
 
@@ -33,8 +33,10 @@ React Native / Expo life-countdown app with terracotta theme. Full onboarding + 
 - `rescheduleIfEnabled()` — reads user + lang from AsyncStorage, picks daily quote, schedules
 - `requestPermission()`, `cancelDaily()` also exported
 - `setNotificationHandler` called at module level (shows alert, no sound)
-- Notification content: quote + stats (days left, life %, yrs/mo remaining), bilingual
+- Notification content: `buildDailyMessage()` from `src/utils/dailyMessage.ts` — 8 bilingual templates, date-seeded random (same message all day), no title
+- Templates embed: weekday, date, days-left-in-month, life %, remaining years/months/days, day-of-year
 - Trigger: `SchedulableTriggerInputTypes.DAILY` at user-selected hour (default 9:00)
+- Test button in Settings sends notification after 2 seconds
 
 ## Daily quote rotation (`src/storage.ts`)
 
