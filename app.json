@@ -29,7 +29,50 @@
     },
     "plugins": [
       "expo-font",
-      "expo-notifications"
+      "expo-notifications",
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "DeathCounterWidget",
+              "label": "D/C · Life",
+              "minWidth": "250dp",
+              "minHeight": "110dp",
+              "description": "Days, months and life progress",
+              "previewImage": "./assets/adaptive-icon.png",
+              "targetCellWidth": 4,
+              "targetCellHeight": 2,
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000
+            },
+            {
+              "name": "YearWidget",
+              "label": "D/C · Year",
+              "minWidth": "110dp",
+              "minHeight": "110dp",
+              "description": "Day of year progress",
+              "previewImage": "./assets/adaptive-icon.png",
+              "targetCellWidth": 2,
+              "targetCellHeight": 2,
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000
+            },
+            {
+              "name": "TodayWidget",
+              "label": "D/C · Today",
+              "minWidth": "110dp",
+              "minHeight": "110dp",
+              "description": "Today's hours used",
+              "previewImage": "./assets/adaptive-icon.png",
+              "targetCellWidth": 2,
+              "targetCellHeight": 2,
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000
+            }
+          ]
+        }
+      ]
     ]
   }
 }

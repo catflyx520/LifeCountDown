@@ -1,6 +1,8 @@
 import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { buildDailyMessage } from './utils/dailyMessage';
+import { rawDashQuotes } from './i18n';
+import { getDailyQuoteIndex } from './storage';
 
 try {
   Notifications.setNotificationHandler({
@@ -35,10 +37,13 @@ async function buildAndSchedule(
   user: { daysLeft: number; age: number; targetAge: number; notifyHour: number },
   lang: string,
 ): Promise<void> {
-  const body = buildDailyMessage(user, lang);
+  const quotes = rawDashQuotes[lang as 'en' | 'zh'];
+  const index = await getDailyQuoteIndex(quotes.length);
+  const quote = quotes[index];
+  const { title, body } = buildDailyMessage(user, lang, quote);
   await Notifications.cancelAllScheduledNotificationsAsync();
   await Notifications.scheduleNotificationAsync({
-    content: { title: null, body },
+    content: { title, body },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.DAILY,
       hour: user.notifyHour ?? 9,
@@ -56,9 +61,12 @@ export async function sendTestNotification(): Promise<void> {
     if (!userRaw) return;
     const user = JSON.parse(userRaw);
     const lang = langRaw === 'zh' ? 'zh' : 'en';
-    const body = buildDailyMessage(user, lang);
+    const quotes = rawDashQuotes[lang as 'en' | 'zh'];
+    const index = await getDailyQuoteIndex(quotes.length);
+    const quote = quotes[index];
+    const { title, body } = buildDailyMessage(user, lang, quote);
     await Notifications.scheduleNotificationAsync({
-      content: { title: null, body },
+      content: { title, body },
       trigger: { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds: 2 },
     });
   } catch {}
