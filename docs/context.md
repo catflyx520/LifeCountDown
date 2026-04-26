@@ -53,6 +53,24 @@ React Native / Expo life-countdown app with terracotta theme. Full onboarding + 
 
 `expo-notifications` local scheduled notifications do NOT work in Expo Go on Android (SDK 53+). All notification calls are wrapped in try-catch so the app doesn't crash — the Settings toggle UI works but notifications won't actually fire. To test notifications properly, a **development build** (`expo-dev-client`) is required.
 
+## Home Screen Widgets (`src/widgets/`)
+
+- Library: `react-native-android-widget` (requires dev build, not Expo Go)
+- 3 widgets registered in `app.json`:
+  - `DeathCounterWidget` (4×2): D/C monogram, days, months, life progress bar, daily quote
+  - `YearWidget` (2×2): day of year / 365 + progress bar
+  - `TodayWidget` (2×2): today's % used + progress bar
+- Task handler: `src/widgets/widgetTaskHandler.ts` — reads AsyncStorage, renders via `renderWidget()`
+- Registered in `index.ts` via `registerWidgetTaskHandler`
+- Colors: hex+alpha only (rgba not supported by widget types)
+- **To test:** `npx expo install --fix` → `npx expo run:android` → long-press home screen → add widget
+
+## Notification format (updated)
+
+- `buildDailyMessage` now returns `{ title, body }` — title is a stat-based hook line, body includes quote
+- 8 templates × 2 languages, date-seeded (same all day)
+- Quote from `rawDashQuotes` appended at bottom of body
+
 ## What to do next
 
 1. Community STREAKS and cohort values — replace with real aggregate data once Firebase Auth + users exist
