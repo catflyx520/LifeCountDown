@@ -19,7 +19,7 @@ export default function OnboardingScreen({ navigation }: Props) {
     <Shell>
       {/* top bar */}
       <View style={styles.topBar}>
-        <Eyebrow>D/C · v.01</Eyebrow>
+        <Eyebrow>L/C · v.01</Eyebrow>
 
         <TouchableOpacity onPress={() => setShowLangMenu(true)} style={styles.flagBtn}>
           <Text style={styles.flag}>{currentLang.flag}</Text>

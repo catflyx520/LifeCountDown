@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Life Countdown",
-    "slug": "life-countdown",
+    "name": "Life Counter",
+    "slug": "life-counter",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
