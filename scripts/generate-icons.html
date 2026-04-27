@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Life Counter — Generate Icons</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #e8e2d4; font-family: monospace; padding: 40px; }
+  h1 { font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: rgba(58,46,30,0.5); margin-bottom: 32px; }
+  .row { display: flex; gap: 40px; flex-wrap: wrap; margin-bottom: 40px; }
+  .item { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .item label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: rgba(58,46,30,0.5); }
+  button {
+    padding: 8px 20px; border-radius: 8px; border: none; cursor: pointer;
+    background: #b5533c; color: #f5ecd6;
+    font-family: monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+  }
+  button:hover { opacity: 0.85; }
+  canvas { border-radius: 12px; }
+</style>
+</head>
+<body>
+<h1>Life Counter · Icon Generator · Open in Chrome → Download PNGs → Replace assets/</h1>
+
+<div class="row">
+  <div class="item">
+    <canvas id="icon1024" width="1024" height="1024" style="width:160px;height:160px;"></canvas>
+    <label>icon.png · 1024×1024</label>
+    <button onclick="dl('icon1024','icon.png')">Download icon.png</button>
+  </div>
+  <div class="item">
+    <canvas id="adaptive1024" width="1024" height="1024" style="width:160px;height:160px;background:#eadfc3;border-radius:12px;"></canvas>
+    <label>adaptive-icon.png · 1024×1024</label>
+    <button onclick="dl('adaptive1024','adaptive-icon.png')">Download adaptive-icon.png</button>
+  </div>
+  <div class="item">
+    <canvas id="splash200" width="200" height="200" style="width:120px;height:120px;background:#eadfc3;border-radius:12px;"></canvas>
+    <label>splash-icon.png · 200×200</label>
+    <button onclick="dl('splash200','splash-icon.png')">Download splash-icon.png</button>
+  </div>
+</div>
+
+<script>
+// ── Draw hourglass icon ──────────────────────────────────────────────────────
+// viewBox: 0 0 120 120
+// icon1024: full icon with rounded-rect background
+// adaptive: foreground only (transparent bg), hourglass centered with padding
+// splash: foreground only, small
+
+const BG      = '#eadfc3';
+const FG      = '#3a2e1e';
+const ACCENT  = '#b5533c';
+
+function drawIcon(ctx, size, withBg) {
+  const S = size / 120; // scale factor
+
+  ctx.save();
+  ctx.scale(S, S);
+
+  if (withBg) {
+    // Rounded square background
+    const r = 28;
+    ctx.beginPath();
+    ctx.moveTo(r, 0);
+    ctx.lineTo(120 - r, 0);
+    ctx.quadraticCurveTo(120, 0, 120, r);
+    ctx.lineTo(120, 120 - r);
+    ctx.quadraticCurveTo(120, 120, 120 - r, 120);
+    ctx.lineTo(r, 120);
+    ctx.quadraticCurveTo(0, 120, 0, 120 - r);
+    ctx.lineTo(0, r);
+    ctx.quadraticCurveTo(0, 0, r, 0);
+    ctx.closePath();
+    ctx.fillStyle = BG;
+    ctx.fill();
+  }
+
+  // Top bar
+  ctx.fillStyle = FG;
+  roundRect(ctx, 28, 22, 64, 5, 2);
+  ctx.fill();
+
+  // Bottom bar
+  roundRect(ctx, 28, 93, 64, 5, 2);
+  ctx.fill();
+
+  // Top triangle (clipped sand fill)
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(33, 27); ctx.lineTo(87, 27); ctx.lineTo(63, 58); ctx.lineTo(57, 58);
+  ctx.closePath();
+  ctx.clip();
+  ctx.fillStyle = ACCENT;
+  ctx.fillRect(0, 34, 120, 40);
+  ctx.restore();
+
+  // Top triangle outline
+  ctx.strokeStyle = FG;
+  ctx.lineWidth = 2;
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  ctx.moveTo(33, 27); ctx.lineTo(87, 27); ctx.lineTo(63, 58); ctx.lineTo(57, 58);
+  ctx.closePath();
+  ctx.stroke();
+
+  // Bottom triangle (clipped sand fill)
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(57, 62); ctx.lineTo(63, 62); ctx.lineTo(87, 93); ctx.lineTo(33, 93);
+  ctx.closePath();
+  ctx.clip();
+  ctx.fillStyle = ACCENT;
+  ctx.fillRect(0, 78, 120, 30);
+  ctx.restore();
+
+  // Bottom triangle outline
+  ctx.beginPath();
+  ctx.moveTo(57, 62); ctx.lineTo(63, 62); ctx.lineTo(87, 93); ctx.lineTo(33, 93);
+  ctx.closePath();
+  ctx.stroke();
+
+  // Falling grains
+  ctx.fillStyle = ACCENT;
+  circle(ctx, 60, 65, 1.8);
+  ctx.fill();
+  ctx.globalAlpha = 0.7;
+  circle(ctx, 60, 72, 1.4);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // Neck clear
+  ctx.fillStyle = withBg ? BG : 'rgba(0,0,0,0)';
+  if (!withBg) {
+    ctx.clearRect(56, 56, 8, 8);
+  } else {
+    ctx.fillRect(56, 56, 8, 8);
+  }
+
+  ctx.restore();
+}
+
+function drawAdaptive(ctx, size) {
+  // Adaptive icon: hourglass centered with ~18% padding on all sides
+  const pad = size * 0.15;
+  const inner = size - pad * 2;
+  ctx.save();
+  ctx.translate(pad, pad);
+  const S = inner / 120;
+  ctx.scale(S, S);
+
+  // Top bar
+  ctx.fillStyle = FG;
+  roundRect(ctx, 28, 22, 64, 5, 2); ctx.fill();
+  roundRect(ctx, 28, 93, 64, 5, 2); ctx.fill();
+
+  // Top triangle sand
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(33, 27); ctx.lineTo(87, 27); ctx.lineTo(63, 58); ctx.lineTo(57, 58);
+  ctx.closePath(); ctx.clip();
+  ctx.fillStyle = ACCENT;
+  ctx.fillRect(0, 34, 120, 40);
+  ctx.restore();
+
+  // Top triangle outline
+  ctx.strokeStyle = FG; ctx.lineWidth = 2; ctx.lineJoin = 'round';
+  ctx.beginPath();
+  ctx.moveTo(33, 27); ctx.lineTo(87, 27); ctx.lineTo(63, 58); ctx.lineTo(57, 58);
+  ctx.closePath(); ctx.stroke();
+
+  // Bottom triangle sand
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(57, 62); ctx.lineTo(63, 62); ctx.lineTo(87, 93); ctx.lineTo(33, 93);
+  ctx.closePath(); ctx.clip();
+  ctx.fillStyle = ACCENT;
+  ctx.fillRect(0, 78, 120, 30);
+  ctx.restore();
+
+  // Bottom triangle outline
+  ctx.beginPath();
+  ctx.moveTo(57, 62); ctx.lineTo(63, 62); ctx.lineTo(87, 93); ctx.lineTo(33, 93);
+  ctx.closePath(); ctx.stroke();
+
+  // Grains
+  ctx.fillStyle = ACCENT;
+  circle(ctx, 60, 65, 1.8); ctx.fill();
+  ctx.globalAlpha = 0.7;
+  circle(ctx, 60, 72, 1.4); ctx.fill();
+  ctx.globalAlpha = 1;
+
+  ctx.restore();
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function circle(ctx, x, y, r) {
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.closePath();
+}
+
+function dl(id, filename) {
+  const canvas = document.getElementById(id);
+  const link = document.createElement('a');
+  link.download = filename;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+// ── Render all canvases ──────────────────────────────────────────────────────
+window.onload = function() {
+  // icon.png — full with bg
+  const c1 = document.getElementById('icon1024');
+  drawIcon(c1.getContext('2d'), 1024, true);
+
+  // adaptive-icon.png — foreground only, transparent bg
+  const c2 = document.getElementById('adaptive1024');
+  drawAdaptive(c2.getContext('2d'), 1024);
+
+  // splash-icon.png — foreground only, small
+  const c3 = document.getElementById('splash200');
+  drawAdaptive(c3.getContext('2d'), 200);
+};
+</script>
+</body>
+</html>
