@@ -35,6 +35,7 @@
     "react-native-svg": "15.12.1"
   },
   "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "@types/react": "~19.1.0",
     "firebase-admin": "^13.8.0",
     "typescript": "~5.9.2"
