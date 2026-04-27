@@ -25,9 +25,7 @@ export function buildDailyMessage(
   const now = new Date();
   const today = now.toISOString().slice(0, 10);
 
-  const year  = now.getFullYear();
-  const month = now.getMonth() + 1;
-  const day   = now.getDate();
+  const month     = now.getMonth() + 1;
   const weekday   = lang === 'zh' ? weekdaysZh[now.getDay()] : weekdaysEn[now.getDay()];
   const monthName = monthsEn[now.getMonth()];
   const daysInMonth = daysLeftInMonth();
@@ -43,71 +41,71 @@ export function buildDailyMessage(
 
   const zh: { title: string; body: string }[] = [
     {
-      title: `${daysStr} 天还在。`,
-      body: `今天是${weekday}，${month}月还剩${daysInMonth}天。\n${pct}%的人生已经过去，还有${years}年${months}个月。别让今天只是一个数字。`,
-    },
-    {
-      title: `早安，${weekday}。`,
-      body: `这个月快结束了——还剩${daysInMonth}天。你的${daysStr}天里，今天只有一次。好好用。`,
-    },
-    {
-      title: `人生进度：${pct}%。`,
-      body: `${year}年${month}月${day}日，还剩${years}年。${years}年后的你，会感谢今天的选择吗？`,
-    },
-    {
-      title: `今年第 ${doy} 天。`,
-      body: `${month}月还有${daysInMonth}天。那些还没做的事，今天是个好日子。时间在走，你也可以。`,
-    },
-    {
-      title: `你还有 ${daysStr} 天。`,
-      body: `不多，但够了——如果你认真用的话。${weekday}，今天留下点什么吧。`,
-    },
-    {
-      title: `${years} 年 ${months} 个月。`,
-      body: `人生${pct}%。不是来吓你的，是提醒你——你还在，还来得及。`,
+      title: `还剩 ${daysStr} 天。`,
+      body: `早安。今年第 ${doy} 天。\n今天最重要的事是什么？`,
     },
     {
       title: `${month}月还剩 ${daysInMonth} 天。`,
-      body: `但你还有${years}年，${daysStr}天。时间比你想的多，也比你想的少。好好过。`,
+      body: `${daysStr} 天还在。这个月快结束了。\n你在好好用吗？`,
     },
     {
-      title: `${pctRemaining}% 还没发生。`,
-      body: `${year}年${month}月，${weekday}。进度走到了${pct}%。剩下的${pctRemaining}%，你打算怎么过？`,
+      title: `人生进度 ${pct}%。`,
+      body: `还有 ${years} 年。\n${years} 年后的你，会感谢今天的选择吗？`,
+    },
+    {
+      title: `今年第 ${doy} 天。`,
+      body: `还剩 ${daysStr} 天。时间在走。\n你在建造什么？`,
+    },
+    {
+      title: `${daysStr} 天。今天用一天。`,
+      body: `${weekday}。每过一天就少一天。\n让今天值得。`,
+    },
+    {
+      title: `还有 ${years} 年 ${months} 个月。`,
+      body: `不是来吓你的，是提醒你——\n你还在，这就是一切。`,
+    },
+    {
+      title: `${month}月还剩 ${daysInMonth} 天。`,
+      body: `之后这个月就永远过去了。\n你想完成什么？`,
+    },
+    {
+      title: `${pctRemaining}% 还在前方。`,
+      body: `${pct}% 已过。剩下的还是你的。\n${weekday}——从这里开始。`,
     },
   ];
 
   const en: { title: string; body: string }[] = [
     {
       title: `${daysStr} days left.`,
-      body: `It's ${weekday}. ${daysInMonth} days left in ${monthName}.\n${pct}% of your life is behind you. ${years} yrs ${months} mo ahead.\nDon't let today just be a number.`,
+      body: `Good morning. Day ${doy} of the year.\nWhat matters most today?`,
     },
     {
-      title: `Good morning, ${weekday}.`,
-      body: `This month ends in ${daysInMonth} days.\nOf your ${daysStr} days left, today only happens once.\nMake it count.`,
+      title: `${monthName} ends in ${daysInMonth} days.`,
+      body: `${daysStr} days remain. This month is almost done.\nAre you spending it well?`,
     },
     {
       title: `Life at ${pct}%.`,
-      body: `${monthName} ${day}, ${year}. ${years} years left.\nWill the you in ${years} years thank today's choices?`,
+      body: `${years} years left.\nWill the you in ${years} years thank today's choices?`,
     },
     {
       title: `Day ${doy} of the year.`,
-      body: `${daysInMonth} days left in ${monthName}.\nThings you haven't done yet — today is a good day.\nTime moves. So can you.`,
+      body: `${daysStr} days remain. The year is passing.\nWhat are you building?`,
     },
     {
-      title: `You have ${daysStr} days left.`,
-      body: `Not many, but enough — if you use them well.\n${weekday}. Leave something behind today.`,
+      title: `${daysStr} days. Use one today.`,
+      body: `${weekday}. Each day spent is gone for good.\nMake this one count.`,
     },
     {
-      title: `${years} years ${months} months.`,
-      body: `Life at ${pct}%.\nNot here to scare you. Just reminding you —\nyou're still here. There's still time.`,
+      title: `${years} years ${months} months left.`,
+      body: `Not a warning — a reminder.\nYou're still here. That's everything.`,
     },
     {
       title: `${daysInMonth} days left this month.`,
-      body: `But you still have ${years} years. ${daysStr} days.\nMore than you think. Less than you think. Live well.`,
+      body: `After that, ${monthName} is gone forever.\nWhat do you want to finish?`,
     },
     {
-      title: `${pctRemaining}% hasn't happened yet.`,
-      body: `${monthName} ${year}, ${weekday}. Progress: ${pct}%.\nThe remaining ${pctRemaining}% — how will you spend it?`,
+      title: `${pctRemaining}% still ahead.`,
+      body: `${pct}% is done. The rest is still yours.\n${weekday} — start here.`,
     },
   ];
 
