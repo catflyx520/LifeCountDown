@@ -53,11 +53,33 @@ function renderPng(svg, outPath) {
   console.log(`✓ ${path.relative(process.cwd(), outPath)}`);
 }
 
+// White notification icon (transparent bg, white hourglass — Android requirement)
+function notificationSvg(size, pad) {
+  const inner = size - pad * 2;
+  const scale = inner / 120;
+  return `
+<svg width="${size}" height="${size}" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g transform="translate(${pad},${pad}) scale(${scale})">
+    <rect x="28" y="22" width="64" height="5" rx="2" fill="white"/>
+    <rect x="28" y="93" width="64" height="5" rx="2" fill="white"/>
+    <clipPath id="ct"><path d="M33 27 L87 27 L63 58 L57 58 Z"/></clipPath>
+    <clipPath id="cb"><path d="M57 62 L63 62 L87 93 L33 93 Z"/></clipPath>
+    <rect x="0" y="34" width="120" height="40" fill="white" clip-path="url(#ct)"/>
+    <path d="M33 27 L87 27 L63 58 L57 58 Z" stroke="white" stroke-width="2" fill="none" stroke-linejoin="round"/>
+    <rect x="0" y="78" width="120" height="30" fill="white" clip-path="url(#cb)"/>
+    <path d="M57 62 L63 62 L87 93 L33 93 Z" stroke="white" stroke-width="2" fill="none" stroke-linejoin="round"/>
+    <circle cx="60" cy="65" r="1.8" fill="white"/>
+    <circle cx="60" cy="72" r="1.4" fill="white" opacity="0.7"/>
+  </g>
+</svg>`;
+}
+
 const assets = path.join(__dirname, '..', 'assets');
 
 renderPng(iconSvg,                         path.join(assets, 'icon.png'));
 renderPng(foregroundSvg(1024, 154),        path.join(assets, 'adaptive-icon.png'));
 renderPng(foregroundSvg(200, 30),          path.join(assets, 'splash-icon.png'));
 renderPng(foregroundSvg(48, 6),            path.join(assets, 'favicon.png'));
+renderPng(notificationSvg(96, 12),         path.join(assets, 'notification-icon.png'));
 
 console.log('\nDone — rebuild the app to see new icons.');

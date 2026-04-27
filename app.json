@@ -29,7 +29,10 @@
     },
     "plugins": [
       "expo-font",
-      "expo-notifications",
+      ["expo-notifications", {
+        "icon": "./assets/notification-icon.png",
+        "color": "#b5533c"
+      }],
       [
         "react-native-android-widget",
         {
