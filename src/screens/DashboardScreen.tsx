@@ -74,7 +74,7 @@ export default function DashboardScreen() {
     >
       {/* top bar */}
       <View style={styles.topBar}>
-        <Eyebrow>D/C · {today}</Eyebrow>
+        <Eyebrow>L/C · {today}</Eyebrow>
         <View style={styles.livePip}>
           <View style={styles.dot} />
           <Eyebrow>{s.live}</Eyebrow>
