@@ -1,10 +1,10 @@
 # Development Context
 
-> Claude reads this automatically at session start. Last updated: 2026-04-25 (updated).
+> Claude reads this automatically at session start. Last updated: 2026-04-26.
 
 ## Project
 
-React Native / Expo life-countdown app with terracotta theme. Full onboarding + all screens complete and working.
+**Life Counter** (formerly Life Countdown) — React Native / Expo app with terracotta theme. Full onboarding + all screens complete and working. App slug: `life-counter`. Monogram: **L/C**.
 
 ## What's done
 
