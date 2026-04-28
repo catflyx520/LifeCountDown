@@ -203,6 +203,17 @@ const en = {
   aiMode: (confidence: number) => `AI · ${confidence}% confidence`,
   manualMode: 'Manual',
 
+  // Onboarding quotes (ManualScreen result)
+  onboardingQuotes: [
+    { t: 'It is not that we have a short time to live, but that we waste a lot of it.', a: 'Seneca' },
+    { t: 'We are always complaining that our days are few, and acting as though there would be no end of them.', a: 'Seneca' },
+    { t: 'Let us prepare our minds as if we had come to the very end of life.', a: 'Seneca' },
+    { t: 'Remember that you are mortal; so make the most of your time.', a: 'Marcus Aurelius' },
+    { t: 'The whole future lies in uncertainty: live immediately.', a: 'Seneca' },
+    { t: 'How we spend our days is, of course, how we spend our lives.', a: 'Annie Dillard' },
+    { t: 'Time is the most valuable thing a man can spend.', a: 'Theophrastus' },
+  ],
+
   // Notifications
   notifReminder: 'Daily Reminder',
   notifReminderNote: 'A daily nudge with your life stats & a quote',
@@ -402,6 +413,17 @@ const zh: typeof en = {
   reset: '重置',
   aiMode: (confidence) => `AI · 置信度 ${confidence}%`,
   manualMode: '手动',
+
+  // Onboarding quotes (ManualScreen result)
+  onboardingQuotes: [
+    { t: '我们的时间并不短暂，是我们浪费了太多。', a: '塞涅卡' },
+    { t: '我们总抱怨时日无多，却又活得好像永无止境。', a: '塞涅卡' },
+    { t: '让我们做好准备，仿佛已走到生命的尽头。', a: '塞涅卡' },
+    { t: '记住你终有一死，所以要充分利用你的时间。', a: '马可·奥勒留' },
+    { t: '整个未来都充满不确定——立刻去活。', a: '塞涅卡' },
+    { t: '我们如何度过每一天，就是如何度过这一生。', a: '安妮·迪拉德' },
+    { t: '时间是人能花费的最宝贵的东西。', a: '泰奥弗拉斯托斯' },
+  ],
 
   // Notifications
   notifReminder: '每日提醒',

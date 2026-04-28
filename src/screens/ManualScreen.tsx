@@ -15,16 +15,6 @@ import { useT } from '../i18n';
 
 type Props = { navigation: NativeStackNavigationProp<RootStackParamList, 'Manual'> };
 
-const QUOTES = [
-  { t: "It is not that we have a short time to live, but that we waste a lot of it.", a: "Seneca" },
-  { t: "We are always complaining that our days are few, and acting as though there would be no end of them.", a: "Seneca" },
-  { t: "Let us prepare our minds as if we had come to the very end of life.", a: "Seneca" },
-  { t: "Remember that you are mortal; so make the most of your time.", a: "Marcus Aurelius" },
-  { t: "The whole future lies in uncertainty: live immediately.", a: "Seneca" },
-  { t: "How we spend our days is, of course, how we spend our lives.", a: "Annie Dillard" },
-  { t: "Time is the most valuable thing a man can spend.", a: "Theophrastus" },
-];
-
 type Stage = 'pick' | 'name' | 'result';
 
 export default function ManualScreen({ navigation }: Props) {
@@ -36,7 +26,7 @@ export default function ManualScreen({ navigation }: Props) {
   const [daysLeft, setDaysLeft] = useState(0);
   const [fillPct, setFillPct] = useState(0.7);
   const [savedName, setSavedName] = useState('');
-  const quote = QUOTES[target % QUOTES.length];
+  const quote = s.onboardingQuotes[target % s.onboardingQuotes.length];
 
   const lockIn = async () => {
     const user = await loadUser();
