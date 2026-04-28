@@ -1,6 +1,6 @@
 # Development Context
 
-> Claude reads this automatically at session start. Last updated: 2026-04-26.
+> Claude reads this automatically at session start. Last updated: 2026-04-27.
 
 ## Project
 
@@ -12,68 +12,67 @@
 - All 5 tabs: Dashboard, Figures, Capsule, Community, Settings
 - AnimatedHourglass SVG component
 - AI integration via Gemini (`gemini-2.5-flash`) in QuizScreen
-- Full i18n (zh/en) via `useT()` — returns `{ s, lang, setLang }`. All screens fully translated including Dashboard quotes, Capsule unlock options, Community cohort/streaks
+- Full i18n (zh/en) via `useT()` — all screens fully translated including onboarding quotes, Dashboard quotes, Capsule unlock options, Community cohort/streaks
 - AsyncStorage-based local state (`@lifecountdown/user`)
 - Firebase client SDK (`firebase` package), initialized in `src/firebase.ts`
 - Firestore seeded: 13 quotes, 12 figures (with `name_zh`), app_config/global
-- FiguresScreen: live Firestore data, bilingual names + notes, sorted by died_age, uses `passedAt()` i18n
-- CommunityScreen: quotes section live from Firestore; COHORT/STREAKS translated but still static mock values
-- Splash screen (`src/components/AppSplash.tsx`): draining hourglass + "life count down", covers app from first frame, fades out 1.5s after fonts load
+- FiguresScreen: live Firestore data, bilingual names + notes, sorted by died_age
+- CommunityScreen: quotes section live from Firestore; cohort/streaks still static mock values
+- Dev build working (`expo-dev-client`) — connect physical Android via Wireless Debugging
+
+## Branding
+
+- App name: **Life Counter**, monogram **L/C**
+- Splash screen (`src/components/AppSplash.tsx`): SVG hourglass wordmark + "Life Counter" + "COUNT WHAT'S LEFT"
+- Onboarding top bar: `L/C · v.01`
+- Dashboard top bar: `L/C · {date}`
+- Settings footer: `L/C · v1.0.0`
+- App icons generated via `node scripts/generate-icons.js` → replaces `assets/icon.png`, `adaptive-icon.png`, `splash-icon.png`, `notification-icon.png`
+- Icon generation uses `@resvg/resvg-js` (no compilation needed)
 
 ## Firebase setup
 
 - `src/firebase.ts` — initializes from `EXPO_PUBLIC_FIREBASE_*` env vars, exports `db`
 - `.env` has all keys (gitignored) — see `.env.example` for template
 - `serviceAccount.json` in project root (gitignored) — admin SDK only, for seed scripts
-- Firestore Security Rules: quotes/figures/app_config are read-only from client (update rules if needed)
+- Firestore Security Rules: quotes/figures/app_config are read-only from client
 
 ## Notifications (`src/notifications.ts`)
 
-- `expo-notifications` installed; plugin added to `app.json`
-- `rescheduleIfEnabled()` — reads user + lang from AsyncStorage, picks daily quote, schedules
-- `requestPermission()`, `cancelDaily()` also exported
-- `setNotificationHandler` called at module level (shows alert, no sound)
-- Notification content: `buildDailyMessage()` from `src/utils/dailyMessage.ts` — 8 bilingual templates, date-seeded random (same message all day), no title
-- Templates embed: weekday, date, days-left-in-month, life %, remaining years/months/days, day-of-year
-- Trigger: `SchedulableTriggerInputTypes.DAILY` at user-selected hour (default 9:00)
-- Test button in Settings sends notification after 2 seconds
+- `expo-notifications` installed; plugin configured in `app.json` with white hourglass notification icon
+- Works in dev build (`expo-dev-client`), NOT in Expo Go (SDK 53+ limitation)
+- `rescheduleIfEnabled()` — reads user + lang from AsyncStorage, schedules daily notification
+- Notification format (matches LC design):
+  - **title**: short stat hook (e.g. "12,045 days left." / "人生进度 33.2%。")
+  - **body**: 1-2 sentences, clean and direct
+  - **quote**: appended at bottom as `"..." — AUTHOR`
+- 8 templates × 2 languages, date-seeded random (same message all day)
+- Settings: toggle On/Off + hour picker (7-21) + "发送测试通知" test button (fires in 2s)
 
 ## Daily quote rotation (`src/storage.ts`)
 
-- `getDailyQuoteIndex(total)` — stores `{ date, index }` in `@lifecountdown/daily-quote`; picks new random index if date changes
-- DashboardScreen uses this instead of `days % quotes.length`
-
-## Settings screen notifications card
-
-- Toggle (Off/On) → requests permission on first enable
-- Hour picker: 7, 8, 9, 10, 12, 20, 21 — tapping reschedules immediately
-- Permission denied message shown if user rejects
-
-## Known Expo Go limitation
-
-`expo-notifications` local scheduled notifications do NOT work in Expo Go on Android (SDK 53+). All notification calls are wrapped in try-catch so the app doesn't crash — the Settings toggle UI works but notifications won't actually fire. To test notifications properly, a **development build** (`expo-dev-client`) is required.
+- `getDailyQuoteIndex(total)` — stores `{ date, index }` in `@lifecountdown/daily-quote`
+- DashboardScreen uses this for daily random quote
 
 ## Home Screen Widgets (`src/widgets/`)
 
-- Library: `react-native-android-widget` (requires dev build, not Expo Go)
+- Library: `react-native-android-widget` (requires dev build)
 - 3 widgets registered in `app.json`:
-  - `DeathCounterWidget` (4×2): D/C monogram, days, months, life progress bar, daily quote
+  - `DeathCounterWidget` (4×2): L/C monogram, days, months, life progress bar, daily quote
   - `YearWidget` (2×2): day of year / 365 + progress bar
   - `TodayWidget` (2×2): today's % used + progress bar
-- Task handler: `src/widgets/widgetTaskHandler.ts` — reads AsyncStorage, renders via `renderWidget()`
-- Registered in `index.ts` via `registerWidgetTaskHandler`
-- Colors: hex+alpha only (rgba not supported by widget types)
-- **To test:** `npx expo install --fix` → `npx expo run:android` → long-press home screen → add widget
+- Task handler: `src/widgets/widgetTaskHandler.ts`
+- **To add widgets:** long-press home screen → Widgets → search "L/C" or "Life Counter"
 
-## Notification format (updated)
+## Daily message util (`src/utils/dailyMessage.ts`)
 
-- `buildDailyMessage` now returns `{ title, body }` — title is a stat-based hook line, body includes quote
-- 8 templates × 2 languages, date-seeded (same all day)
-- Quote from `rawDashQuotes` appended at bottom of body
+- `buildDailyMessage(user, lang, quote?)` → `{ title, body }`
+- Used by both notifications and test button
 
 ## What to do next
 
-1. Community STREAKS and cohort values — replace with real aggregate data once Firebase Auth + users exist
-2. Decide on Firebase Auth (real user accounts) vs staying anonymous
-3. `@anthropic-ai/sdk` in dependencies, not yet wired up
-4. To test notifications: build a dev build with `expo-dev-client`
+1. Test widgets on physical device after `npx expo run:android`
+2. Test notifications: Settings → Daily Reminder ON → send test → go to home screen
+3. Community STREAKS and cohort values — replace with real data once Firebase Auth exists
+4. Decide on Firebase Auth (real user accounts) vs staying anonymous
+5. `@anthropic-ai/sdk` in dependencies, not yet wired up
