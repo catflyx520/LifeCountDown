@@ -1,6 +1,6 @@
 # Development Context
 
-> Claude reads this automatically at session start. Last updated: 2026-04-27.
+> Claude reads this automatically at session start. Last updated: 2026-04-28.
 
 ## Project
 
@@ -18,7 +18,7 @@
 - Firestore seeded: 13 quotes, 12 figures (with `name_zh`), app_config/global
 - FiguresScreen: live Firestore data, bilingual names + notes, sorted by died_age
 - CommunityScreen: quotes section live from Firestore; cohort/streaks still static mock values
-- Dev build working (`expo-dev-client`) — connect physical Android via Wireless Debugging
+- Dev build working (`expo-dev-client`) — connect physical Android via Wireless Debugging (`adb pair` first, then `adb connect`)
 
 ## Branding
 
@@ -27,8 +27,10 @@
 - Onboarding top bar: `L/C · v.01`
 - Dashboard top bar: `L/C · {date}`
 - Settings footer: `L/C · v1.0.0`
-- App icons generated via `node scripts/generate-icons.js` → replaces `assets/icon.png`, `adaptive-icon.png`, `splash-icon.png`, `notification-icon.png`
-- Icon generation uses `@resvg/resvg-js` (no compilation needed)
+- App icons generated via `node scripts/generate-icons.js` using `@resvg/resvg-js`
+  - `assets/icon.png` — 1024×1024 with rounded bg
+  - `assets/adaptive-icon.png` — 1024×1024 foreground only
+  - `assets/notification-icon.png` — 96×96 white hourglass
 
 ## Firebase setup
 
@@ -41,28 +43,31 @@
 
 - `expo-notifications` installed; plugin configured in `app.json` with white hourglass notification icon
 - Works in dev build (`expo-dev-client`), NOT in Expo Go (SDK 53+ limitation)
-- `rescheduleIfEnabled()` — reads user + lang from AsyncStorage, schedules daily notification
-- Notification format (matches LC design):
-  - **title**: short stat hook (e.g. "12,045 days left." / "人生进度 33.2%。")
-  - **body**: 1-2 sentences, clean and direct
-  - **quote**: appended at bottom as `"..." — AUTHOR`
-- 8 templates × 2 languages, date-seeded random (same message all day)
-- Settings: toggle On/Off + hour picker (7-21) + "发送测试通知" test button (fires in 2s)
-
-## Daily quote rotation (`src/storage.ts`)
-
-- `getDailyQuoteIndex(total)` — stores `{ date, index }` in `@lifecountdown/daily-quote`
-- DashboardScreen uses this for daily random quote
+- Notification format: title (stat hook) + body (1-2 sentences) + quote at bottom
+- 8 templates × 2 languages in `src/utils/dailyMessage.ts`, date-seeded random
+- Settings: toggle On/Off + hour picker (7-21) + test button (fires in 2s)
 
 ## Home Screen Widgets (`src/widgets/`)
 
-- Library: `react-native-android-widget` (requires dev build)
-- 3 widgets registered in `app.json`:
-  - `DeathCounterWidget` (4×2): L/C monogram, days, months, life progress bar, daily quote
-  - `YearWidget` (2×2): day of year / 365 + progress bar
-  - `TodayWidget` (2×2): today's % used + progress bar
-- Task handler: `src/widgets/widgetTaskHandler.ts`
-- **To add widgets:** long-press home screen → Widgets → search "L/C" or "Life Counter"
+- Library: `react-native-android-widget` (requires dev build, not Expo Go)
+- 3 widgets registered in `app.json`
+- **Architecture**: each widget file exports TWO versions:
+  - `DeathCounterWidget` / `YearWidget` / `TodayWidget` — Android widget renderer (FlexWidget/TextWidget)
+  - `DeathCounterPreview` / `YearPreview` / `TodayPreview` — in-app preview (View/Text)
+  - Both share the same `C` constants object (`as const`) — change one value, both update
+- **Key fixes learned**:
+  - All inner FlexWidget rows need `width: 'match_parent'` or `flex: 1` spacers won't work
+  - Empty FlexWidget children used as color fills need `height: 'match_parent'` — without it Android `wrap_content` = 0 and colors are invisible
+  - `justifyContent: 'space-between'` pushes sections to extremes — use sequential layout with explicit `marginBottom` instead
+- **To debug widget**: use Widget Preview screen (Dashboard → "Widget Preview →") — shows live preview with real data
+- **To update widget on device**: remove from home screen → re-add (hot reload doesn't refresh widgets)
+- **To see config changes** (minHeight, etc.): must `npx expo run:android`
+
+## Widget Preview Screen (`src/screens/WidgetPreviewScreen.tsx`)
+
+- Accessible from Dashboard bottom: "Widget Preview →"
+- Shows all 3 widgets using the `*Preview` components (same constants as real widgets)
+- Use this to iterate on design before rebuilding
 
 ## Daily message util (`src/utils/dailyMessage.ts`)
 
@@ -71,8 +76,8 @@
 
 ## What to do next
 
-1. Test widgets on physical device after `npx expo run:android`
-2. Test notifications: Settings → Daily Reminder ON → send test → go to home screen
+1. Widget bar visibility confirmed fixed — test on device by removing + re-adding widget
+2. Adjust widget font sizes / layout via Widget Preview screen, then sync to widget components
 3. Community STREAKS and cohort values — replace with real data once Firebase Auth exists
 4. Decide on Firebase Auth (real user accounts) vs staying anonymous
 5. `@anthropic-ai/sdk` in dependencies, not yet wired up
