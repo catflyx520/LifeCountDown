@@ -34,9 +34,9 @@ export function YearWidget({ dayOfYear, lang }: Props) {
         <TextWidget text={String(dayOfYear)} style={{ fontFamily: 'serif', fontSize: C.valueSize, color: C.fg }} />
         <TextWidget text="/ 365" style={{ fontFamily: 'monospace', fontSize: C.subSize, color: C.muted59 }} />
       </FlexWidget>
-      <FlexWidget style={{ flexDirection: 'row', height: C.barHeight, borderRadius: C.barRadius }}>
-        <FlexWidget style={{ flex: pct,   backgroundColor: C.accent, borderRadius: C.barRadius }} />
-        <FlexWidget style={{ flex: empty, backgroundColor: C.barEmpty }} />
+      <FlexWidget style={{ flexDirection: 'row', width: 'match_parent', height: C.barHeight, borderRadius: C.barRadius }}>
+        <FlexWidget style={{ flex: pct,   height: 'match_parent', backgroundColor: C.accent }} />
+        <FlexWidget style={{ flex: empty, height: 'match_parent', backgroundColor: C.barEmpty }} />
       </FlexWidget>
     </FlexWidget>
   );

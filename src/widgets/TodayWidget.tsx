@@ -39,9 +39,9 @@ export function TodayWidget({ lang }: Props) {
         <TextWidget text={`${used}%`} style={{ fontFamily: 'serif', fontSize: C.valueSize, color: C.accent }} />
         <TextWidget text={isZh ? '已用' : 'used'} style={{ fontFamily: 'monospace', fontSize: C.subSize, color: C.muted59 }} />
       </FlexWidget>
-      <FlexWidget style={{ flexDirection: 'row', height: C.barHeight, borderRadius: C.barRadius }}>
-        <FlexWidget style={{ flex: used,  backgroundColor: C.accent, borderRadius: C.barRadius }} />
-        <FlexWidget style={{ flex: empty, backgroundColor: C.barEmpty }} />
+      <FlexWidget style={{ flexDirection: 'row', width: 'match_parent', height: C.barHeight, borderRadius: C.barRadius }}>
+        <FlexWidget style={{ flex: used,  height: 'match_parent', backgroundColor: C.accent }} />
+        <FlexWidget style={{ flex: empty, height: 'match_parent', backgroundColor: C.barEmpty }} />
       </FlexWidget>
     </FlexWidget>
   );

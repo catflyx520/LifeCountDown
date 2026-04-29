@@ -81,10 +81,10 @@ export function DeathCounterWidget({ days, months, pct, lang }: Props) {
         <TextWidget text={`${pctStr}%`} style={{ fontFamily: 'monospace', fontSize: C.progressLabelSize, color: C.accent }} />
       </FlexWidget>
 
-      {/* Bar */}
+      {/* Bar — inner children need height: match_parent to fill the 6dp outer height */}
       <FlexWidget style={{ flexDirection: 'row', width: 'match_parent', height: C.barHeight, borderRadius: C.barRadius }}>
-        <FlexWidget style={{ flex: filled, backgroundColor: C.accent, borderRadius: C.barRadius }} />
-        <FlexWidget style={{ flex: empty,  backgroundColor: C.barEmpty }} />
+        <FlexWidget style={{ flex: filled, height: 'match_parent', backgroundColor: C.accent }} />
+        <FlexWidget style={{ flex: empty,  height: 'match_parent', backgroundColor: C.barEmpty }} />
       </FlexWidget>
 
     </FlexWidget>
@@ -97,10 +97,7 @@ export function DeathCounterPreview({ days, months, pct, lang }: Props) {
   const isZh = lang === 'zh';
   const total = filled + empty;
   return (
-    <View
-      style={[s.card, { padding: C.padding, borderRadius: C.radius, backgroundColor: C.bg }]}
-      onLayout={e => console.log('[Card] height:', e.nativeEvent.layout.height, 'width:', e.nativeEvent.layout.width)}
-    >
+    <View style={[s.card, { padding: C.padding, borderRadius: C.radius, backgroundColor: C.bg }]}>
 
       {/* Header */}
       <View style={[s.row, { alignItems: 'center', marginBottom: C.headerMb }]}>
@@ -130,20 +127,14 @@ export function DeathCounterPreview({ days, months, pct, lang }: Props) {
         <Text style={{ fontFamily: fonts.mono, fontSize: C.progressLabelSize, color: C.accent }}>{pctStr}%</Text>
       </View>
 
-      {/* Bar — DEBUG: red bg, height 20 */}
-      <View
-        style={{ height: 20, backgroundColor: 'red' }}
-        onLayout={e => console.log('[Bar] height:', e.nativeEvent.layout.height, 'width:', e.nativeEvent.layout.width, 'y:', e.nativeEvent.layout.y)}
-      >
-        <View style={{ width: `${(filled / total) * 100}%` as any, height: '100%', backgroundColor: 'blue' }} />
+      {/* Bar */}
+      <View style={{ height: C.barHeight, borderRadius: C.barRadius, backgroundColor: C.barEmpty, overflow: 'hidden' }}>
+        <View style={{ width: `${(filled / total) * 100}%` as any, height: '100%', backgroundColor: C.accent }} />
       </View>
 
     </View>
   );
 }
-
-// card height debug
-// remove aspectRatio temporarily to see if content shows
 
 const s = StyleSheet.create({
   card: { aspectRatio: 4 / 2 },
