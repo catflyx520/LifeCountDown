@@ -16,14 +16,14 @@ const C = {
   radius:       20,
   logoSize:     42,
   logoRadius:   8,
-  appLabelSize: 10,
-  numLabelSize: 9,
-  numValueSize: 46,
-  dividerH:     56,
+  appLabelSize: 11,
+  numLabelSize: 10,
+  numValueSize: 52,
+  dividerH:     64,
   dividerMx:    12,
   barHeight:    6,
   barRadius:    3,
-  progressLabelSize: 8,
+  progressLabelSize: 10,
   headerMb:     10,
   progressMb:   6,
 } as const;
@@ -125,9 +125,10 @@ export function DeathCounterPreview({ days, months, pct, lang }: Props) {
       </View>
 
       {/* Progress */}
-      <View>
-        <View style={[s.row, { justifyContent: 'space-between', marginBottom: C.progressMb }]}>
+      <View style={{ width: '100%' }}>
+        <View style={[s.row, { marginBottom: C.progressMb }]}>
           <Text style={{ fontFamily: fonts.mono, fontSize: C.progressLabelSize, color: C.muted73, letterSpacing: 1 }}>LIFE PROGRESS</Text>
+          <View style={{ flex: 1 }} />
           <Text style={{ fontFamily: fonts.mono, fontSize: C.progressLabelSize, color: C.accent }}>{pctStr}%</Text>
         </View>
         <View style={{ height: C.barHeight, borderRadius: C.barRadius, backgroundColor: C.barEmpty, overflow: 'hidden' }}>
