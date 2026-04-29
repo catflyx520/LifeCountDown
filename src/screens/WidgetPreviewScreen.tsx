@@ -35,9 +35,10 @@ function LargeWidget({ user }: { user: UserData }) {
 
   return (
     <View style={lw.card}>
-      {/* Header */}
-      <View style={lw.header}>
-        <View style={lw.headerLeft}>
+
+      {/* TOP: logo + numbers — same grouping as widget */}
+      <View>
+        <View style={lw.header}>
           <Image
             source={require('../../assets/adaptive-icon.png')}
             style={lw.logo}
@@ -45,22 +46,21 @@ function LargeWidget({ user }: { user: UserData }) {
           />
           <MonoText style={lw.appLabel}>  LIFE COUNTER</MonoText>
         </View>
+
+        <View style={lw.numbersRow}>
+          <View style={lw.numCol}>
+            <MonoText style={lw.numLabel}>DAYS</MonoText>
+            <Text style={lw.numValue}>{fmt(days)}</Text>
+          </View>
+          <View style={lw.divider} />
+          <View style={lw.numCol}>
+            <MonoText style={lw.numLabel}>MONTHS</MonoText>
+            <Text style={lw.numValue}>{fmt(months)}</Text>
+          </View>
+        </View>
       </View>
 
-      {/* Numbers */}
-      <View style={lw.numbersRow}>
-        <View style={lw.numCol}>
-          <MonoText style={lw.numLabel}>DAYS</MonoText>
-          <Text style={lw.numValue}>{fmt(days)}</Text>
-        </View>
-        <View style={lw.divider} />
-        <View style={lw.numCol}>
-          <MonoText style={lw.numLabel}>MONTHS</MonoText>
-          <Text style={lw.numValue}>{fmt(months)}</Text>
-        </View>
-      </View>
-
-      {/* Progress */}
+      {/* BOTTOM: progress */}
       <View style={lw.progressSection}>
         <View style={lw.progressLabelRow}>
           <MonoText style={lw.progressLabel}>LIFE PROGRESS</MonoText>
@@ -70,6 +70,7 @@ function LargeWidget({ user }: { user: UserData }) {
           <View style={[lw.fill, { width: `${pct}%` as any }]} />
         </View>
       </View>
+
     </View>
   );
 }
@@ -82,14 +83,14 @@ const lw = StyleSheet.create({
     justifyContent: 'space-between',
     aspectRatio: 4 / 2,
   },
+  // header row: logo + label, marginBottom matches widget's marginBottom: 10
   header: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
-  headerLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
   logo: { width: 42, height: 42 },
   appLabel: { fontSize: 10, color: '#3a2e1e80', letterSpacing: 1 },
-  numbersRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
+  numbersRow: { flexDirection: 'row', alignItems: 'center' },
   numCol: { flex: 1, flexDirection: 'column' },
   numLabel: { fontSize: 9, color: '#3a2e1e80', letterSpacing: 1, marginBottom: 2 },
-  numValue: { fontFamily: fonts.serif, fontSize: 46, color: '#3a2e1e', lineHeight: 48 },
+  numValue: { fontFamily: fonts.serif, fontSize: 46, color: '#3a2e1e', lineHeight: 50 },
   divider: { width: 1, height: 56, backgroundColor: '#3a2e1e26', marginHorizontal: 12 },
   progressSection: { flexDirection: 'column' },
   progressLabelRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
