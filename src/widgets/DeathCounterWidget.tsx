@@ -25,6 +25,7 @@ const C = {
   barRadius:    3,
   progressLabelSize: 9,
   headerMb:     8,
+  numbersMb:    10,
   progressMb:   5,
 } as const;
 
@@ -52,40 +53,38 @@ export function DeathCounterWidget({ days, months, pct, lang }: Props) {
   const isZh = lang === 'zh';
 
   return (
-    <FlexWidget style={{ width: 'match_parent', height: 'match_parent', flexDirection: 'column', backgroundColor: C.bg, borderRadius: C.radius, padding: C.padding, justifyContent: 'space-between' }}>
+    <FlexWidget style={{ width: 'match_parent', height: 'match_parent', flexDirection: 'column', backgroundColor: C.bg, borderRadius: C.radius, padding: C.padding }}>
 
-      <FlexWidget style={{ flexDirection: 'column', width: 'match_parent' }}>
-        {/* Header */}
-        <FlexWidget style={{ flexDirection: 'row', width: 'match_parent', alignItems: 'center', marginBottom: C.headerMb }}>
-          <ImageWidget image={require('../../assets/adaptive-icon.png')} imageWidth={C.logoSize} imageHeight={C.logoSize} radius={C.logoRadius} />
-          <TextWidget text={isZh ? '  人生计数器' : '  LIFE COUNTER'} style={{ fontFamily: 'monospace', fontSize: C.appLabelSize, color: C.muted80, letterSpacing: 1 }} />
+      {/* Header */}
+      <FlexWidget style={{ flexDirection: 'row', width: 'match_parent', alignItems: 'center', marginBottom: C.headerMb }}>
+        <ImageWidget image={require('../../assets/adaptive-icon.png')} imageWidth={C.logoSize} imageHeight={C.logoSize} radius={C.logoRadius} />
+        <TextWidget text={isZh ? '  人生计数器' : '  LIFE COUNTER'} style={{ fontFamily: 'monospace', fontSize: C.appLabelSize, color: C.muted80, letterSpacing: 1 }} />
+      </FlexWidget>
+
+      {/* Numbers */}
+      <FlexWidget style={{ flexDirection: 'row', width: 'match_parent', alignItems: 'center', marginBottom: C.numbersMb }}>
+        <FlexWidget style={{ flex: 1, flexDirection: 'column' }}>
+          <TextWidget text={isZh ? '天数' : 'DAYS'} style={{ fontFamily: 'monospace', fontSize: C.numLabelSize, color: C.muted80, letterSpacing: 1 }} />
+          <TextWidget text={daysStr} style={{ fontFamily: 'serif', fontSize: C.numValueSize, color: C.fg }} />
         </FlexWidget>
-
-        {/* Numbers */}
-        <FlexWidget style={{ flexDirection: 'row', width: 'match_parent', alignItems: 'center' }}>
-          <FlexWidget style={{ flex: 1, flexDirection: 'column' }}>
-            <TextWidget text={isZh ? '天数' : 'DAYS'} style={{ fontFamily: 'monospace', fontSize: C.numLabelSize, color: C.muted80, letterSpacing: 1 }} />
-            <TextWidget text={daysStr} style={{ fontFamily: 'serif', fontSize: C.numValueSize, color: C.fg }} />
-          </FlexWidget>
-          <FlexWidget style={{ width: 1, height: C.dividerH, backgroundColor: C.muted26, marginHorizontal: C.dividerMx }} />
-          <FlexWidget style={{ flex: 1, flexDirection: 'column' }}>
-            <TextWidget text={isZh ? '月数' : 'MONTHS'} style={{ fontFamily: 'monospace', fontSize: C.numLabelSize, color: C.muted80, letterSpacing: 1 }} />
-            <TextWidget text={monthsStr} style={{ fontFamily: 'serif', fontSize: C.numValueSize, color: C.fg }} />
-          </FlexWidget>
+        <FlexWidget style={{ width: 1, height: C.dividerH, backgroundColor: C.muted26, marginHorizontal: C.dividerMx }} />
+        <FlexWidget style={{ flex: 1, flexDirection: 'column' }}>
+          <TextWidget text={isZh ? '月数' : 'MONTHS'} style={{ fontFamily: 'monospace', fontSize: C.numLabelSize, color: C.muted80, letterSpacing: 1 }} />
+          <TextWidget text={monthsStr} style={{ fontFamily: 'serif', fontSize: C.numValueSize, color: C.fg }} />
         </FlexWidget>
       </FlexWidget>
 
-      {/* Progress */}
-      <FlexWidget style={{ flexDirection: 'column', width: 'match_parent' }}>
-        <FlexWidget style={{ flexDirection: 'row', width: 'match_parent', marginBottom: C.progressMb }}>
-          <TextWidget text="LIFE PROGRESS" style={{ fontFamily: 'monospace', fontSize: C.progressLabelSize, color: C.muted73, letterSpacing: 1 }} />
-          <FlexWidget style={{ flex: 1 }} />
-          <TextWidget text={`${pctStr}%`} style={{ fontFamily: 'monospace', fontSize: C.progressLabelSize, color: C.accent }} />
-        </FlexWidget>
-        <FlexWidget style={{ flexDirection: 'row', width: 'match_parent', height: C.barHeight, borderRadius: C.barRadius }}>
-          <FlexWidget style={{ flex: filled, backgroundColor: C.accent, borderRadius: C.barRadius }} />
-          <FlexWidget style={{ flex: empty,  backgroundColor: C.barEmpty }} />
-        </FlexWidget>
+      {/* Progress label */}
+      <FlexWidget style={{ flexDirection: 'row', width: 'match_parent', marginBottom: C.progressMb }}>
+        <TextWidget text="LIFE PROGRESS" style={{ fontFamily: 'monospace', fontSize: C.progressLabelSize, color: C.muted73, letterSpacing: 1 }} />
+        <FlexWidget style={{ flex: 1 }} />
+        <TextWidget text={`${pctStr}%`} style={{ fontFamily: 'monospace', fontSize: C.progressLabelSize, color: C.accent }} />
+      </FlexWidget>
+
+      {/* Bar */}
+      <FlexWidget style={{ flexDirection: 'row', width: 'match_parent', height: C.barHeight, borderRadius: C.barRadius }}>
+        <FlexWidget style={{ flex: filled, backgroundColor: C.accent, borderRadius: C.barRadius }} />
+        <FlexWidget style={{ flex: empty,  backgroundColor: C.barEmpty }} />
       </FlexWidget>
 
     </FlexWidget>
@@ -97,56 +96,40 @@ export function DeathCounterPreview({ days, months, pct, lang }: Props) {
   const { daysStr, monthsStr, pctStr, filled, empty } = compute(days, months, pct);
   const isZh = lang === 'zh';
   const total = filled + empty;
-  console.log('[Widget] pct:', pct, 'filled:', filled, 'empty:', empty, 'total:', total);
-
   return (
     <View style={[s.card, { padding: C.padding, borderRadius: C.radius, backgroundColor: C.bg }]}>
 
-      <View>
-        {/* Header */}
-        <View style={[s.row, { alignItems: 'center', marginBottom: C.headerMb }]}>
-          <Image source={require('../../assets/adaptive-icon.png')} style={{ width: C.logoSize, height: C.logoSize, borderRadius: C.logoRadius }} resizeMode="contain" />
-          <Text style={{ fontFamily: fonts.mono, fontSize: C.appLabelSize, color: C.muted80, letterSpacing: 1 }}>
-            {isZh ? '  人生计数器' : '  LIFE COUNTER'}
-          </Text>
-        </View>
+      {/* Header */}
+      <View style={[s.row, { alignItems: 'center', marginBottom: C.headerMb }]}>
+        <Image source={require('../../assets/adaptive-icon.png')} style={{ width: C.logoSize, height: C.logoSize, borderRadius: C.logoRadius }} resizeMode="contain" />
+        <Text style={{ fontFamily: fonts.mono, fontSize: C.appLabelSize, color: C.muted80, letterSpacing: 1 }}>
+          {isZh ? '  人生计数器' : '  LIFE COUNTER'}
+        </Text>
+      </View>
 
-        {/* Numbers */}
-        <View style={s.row}>
-          <View style={{ flex: 1 }}>
-            <Text style={{ fontFamily: fonts.mono, fontSize: C.numLabelSize, color: C.muted80, letterSpacing: 1 }}>{isZh ? '天数' : 'DAYS'}</Text>
-            <Text style={{ fontFamily: fonts.serif, fontSize: C.numValueSize, color: C.fg, lineHeight: C.numValueSize + 4 }}>{daysStr}</Text>
-          </View>
-          <View style={{ width: 1, height: C.dividerH, backgroundColor: C.muted26, marginHorizontal: C.dividerMx }} />
-          <View style={{ flex: 1 }}>
-            <Text style={{ fontFamily: fonts.mono, fontSize: C.numLabelSize, color: C.muted80, letterSpacing: 1 }}>{isZh ? '月数' : 'MONTHS'}</Text>
-            <Text style={{ fontFamily: fonts.serif, fontSize: C.numValueSize, color: C.fg, lineHeight: C.numValueSize + 4 }}>{monthsStr}</Text>
-          </View>
+      {/* Numbers */}
+      <View style={[s.row, { marginBottom: C.numbersMb }]}>
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontFamily: fonts.mono, fontSize: C.numLabelSize, color: C.muted80, letterSpacing: 1 }}>{isZh ? '天数' : 'DAYS'}</Text>
+          <Text style={{ fontFamily: fonts.serif, fontSize: C.numValueSize, color: C.fg, lineHeight: C.numValueSize + 4 }}>{daysStr}</Text>
+        </View>
+        <View style={{ width: 1, height: C.dividerH, backgroundColor: C.muted26, marginHorizontal: C.dividerMx }} />
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontFamily: fonts.mono, fontSize: C.numLabelSize, color: C.muted80, letterSpacing: 1 }}>{isZh ? '月数' : 'MONTHS'}</Text>
+          <Text style={{ fontFamily: fonts.serif, fontSize: C.numValueSize, color: C.fg, lineHeight: C.numValueSize + 4 }}>{monthsStr}</Text>
         </View>
       </View>
 
-      {/* Progress */}
-      <View
-        style={{ width: '100%' }}
-        onLayout={e => console.log('[Widget] progress outer width:', e.nativeEvent.layout.width)}
-      >
-        <View
-          style={[s.row, { marginBottom: C.progressMb }]}
-          onLayout={e => console.log('[Widget] label row width:', e.nativeEvent.layout.width)}
-        >
-          <Text
-            style={{ fontFamily: fonts.mono, fontSize: C.progressLabelSize, color: C.muted73, letterSpacing: 1 }}
-            onLayout={e => console.log('[Widget] LIFE PROGRESS text width:', e.nativeEvent.layout.width)}
-          >LIFE PROGRESS</Text>
-          <View style={{ flex: 1 }} onLayout={e => console.log('[Widget] spacer width:', e.nativeEvent.layout.width)} />
-          <Text
-            style={{ fontFamily: fonts.mono, fontSize: C.progressLabelSize, color: C.accent }}
-            onLayout={e => console.log('[Widget] pct text width:', e.nativeEvent.layout.width)}
-          >{pctStr}%</Text>
-        </View>
-        <View style={{ height: C.barHeight, borderRadius: C.barRadius, backgroundColor: C.barEmpty, overflow: 'hidden' }}>
-          <View style={{ width: `${(filled / total) * 100}%` as any, height: '100%', backgroundColor: C.accent, borderRadius: C.barRadius }} />
-        </View>
+      {/* Progress label */}
+      <View style={[s.row, { marginBottom: C.progressMb }]}>
+        <Text style={{ fontFamily: fonts.mono, fontSize: C.progressLabelSize, color: C.muted73, letterSpacing: 1 }}>LIFE PROGRESS</Text>
+        <View style={{ flex: 1 }} />
+        <Text style={{ fontFamily: fonts.mono, fontSize: C.progressLabelSize, color: C.accent }}>{pctStr}%</Text>
+      </View>
+
+      {/* Bar */}
+      <View style={{ height: C.barHeight, borderRadius: C.barRadius, backgroundColor: C.barEmpty, overflow: 'hidden' }}>
+        <View style={{ width: `${(filled / total) * 100}%` as any, height: '100%', backgroundColor: C.accent, borderRadius: C.barRadius }} />
       </View>
 
     </View>
@@ -154,6 +137,6 @@ export function DeathCounterPreview({ days, months, pct, lang }: Props) {
 }
 
 const s = StyleSheet.create({
-  card: { justifyContent: 'space-between', aspectRatio: 4 / 2 },
+  card: { aspectRatio: 4 / 2 },
   row:  { flexDirection: 'row' },
 });
