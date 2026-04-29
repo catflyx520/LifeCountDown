@@ -182,6 +182,14 @@ export default function DashboardScreen() {
       >
         <Eyebrow style={{ color: theme.accent }}>{s.viewHourglass}</Eyebrow>
       </TouchableOpacity>
+
+      {/* widget preview */}
+      <TouchableOpacity
+        onPress={() => navigation.navigate('WidgetPreview')}
+        style={[styles.hourglassLink, { marginTop: 8 }]}
+      >
+        <Eyebrow style={{ color: theme.accent }}>Widget Preview →</Eyebrow>
+      </TouchableOpacity>
     </ScrollView>
   );
 }

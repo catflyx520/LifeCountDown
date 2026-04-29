@@ -30,6 +30,7 @@ export type RootStackParamList = {
   Quiz: undefined;
   Main: undefined;
   Hourglass: undefined;
+  WidgetPreview: undefined;
 };
 
 export type MainTabParamList = {
