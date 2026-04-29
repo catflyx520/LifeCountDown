@@ -97,7 +97,10 @@ export function DeathCounterPreview({ days, months, pct, lang }: Props) {
   const isZh = lang === 'zh';
   const total = filled + empty;
   return (
-    <View style={[s.card, { padding: C.padding, borderRadius: C.radius, backgroundColor: C.bg }]}>
+    <View
+      style={[s.card, { padding: C.padding, borderRadius: C.radius, backgroundColor: C.bg }]}
+      onLayout={e => console.log('[Card] height:', e.nativeEvent.layout.height, 'width:', e.nativeEvent.layout.width)}
+    >
 
       {/* Header */}
       <View style={[s.row, { alignItems: 'center', marginBottom: C.headerMb }]}>
@@ -127,14 +130,20 @@ export function DeathCounterPreview({ days, months, pct, lang }: Props) {
         <Text style={{ fontFamily: fonts.mono, fontSize: C.progressLabelSize, color: C.accent }}>{pctStr}%</Text>
       </View>
 
-      {/* Bar */}
-      <View style={{ height: C.barHeight, borderRadius: C.barRadius, backgroundColor: C.barEmpty, overflow: 'hidden' }}>
-        <View style={{ width: `${(filled / total) * 100}%` as any, height: '100%', backgroundColor: C.accent, borderRadius: C.barRadius }} />
+      {/* Bar — DEBUG: red bg, height 20 */}
+      <View
+        style={{ height: 20, backgroundColor: 'red' }}
+        onLayout={e => console.log('[Bar] height:', e.nativeEvent.layout.height, 'width:', e.nativeEvent.layout.width, 'y:', e.nativeEvent.layout.y)}
+      >
+        <View style={{ width: `${(filled / total) * 100}%` as any, height: '100%', backgroundColor: 'blue' }} />
       </View>
 
     </View>
   );
 }
+
+// card height debug
+// remove aspectRatio temporarily to see if content shows
 
 const s = StyleSheet.create({
   card: { aspectRatio: 4 / 2 },
