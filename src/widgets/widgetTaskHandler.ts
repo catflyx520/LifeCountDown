@@ -1,8 +1,7 @@
 import React from 'react';
 import type { WidgetTaskHandlerProps } from 'react-native-android-widget';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { loadUser, getDailyQuoteIndex } from '../storage';
-import { rawDashQuotes } from '../i18n';
+import { loadUser } from '../storage';
 import { DeathCounterWidget } from './DeathCounterWidget';
 import { YearWidget } from './YearWidget';
 import { TodayWidget } from './TodayWidget';
@@ -17,9 +16,6 @@ async function getWidgetData() {
   const user = await loadUser();
   const langRaw = await AsyncStorage.getItem('@lifecountdown/lang');
   const lang = langRaw === 'zh' ? 'zh' : 'en';
-  const quotes = rawDashQuotes[lang];
-  const index = await getDailyQuoteIndex(quotes.length);
-  const quote = quotes[index];
 
   const days   = user.daysLeft;
   const months = Math.floor(days / 30.44);
@@ -28,7 +24,7 @@ async function getWidgetData() {
   const now    = new Date();
   const doy    = Math.ceil((now.getTime() - new Date(now.getFullYear(), 0, 1).getTime()) / 86400000);
 
-  return { user, lang, days, months, pct, doy, quote };
+  return { lang, days, months, pct, doy };
 }
 
 export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
@@ -47,7 +43,6 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
               days: data.days,
               months: data.months,
               pct: data.pct,
-              quote: data.quote.text,
               lang: data.lang,
             })
           );
