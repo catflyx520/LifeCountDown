@@ -7,9 +7,9 @@ interface Props {
 }
 
 export function YearWidget({ dayOfYear, lang }: Props) {
-  const pct = Math.round((dayOfYear / 365) * 100);
-  const empty = Math.max(100 - pct, 1);
-  const isZh = lang === 'zh';
+  const pct   = Math.max(1, Math.round((dayOfYear / 365) * 100));
+  const empty = Math.max(1, 100 - pct);
+  const isZh  = lang === 'zh';
 
   return (
     <FlexWidget
@@ -34,11 +34,11 @@ export function YearWidget({ dayOfYear, lang }: Props) {
         />
         <TextWidget
           text="/ 365"
-          style={{ fontFamily: 'monospace', fontSize: 8, color: '#3a2e1e66' }}
+          style={{ fontFamily: 'monospace', fontSize: 8, color: '#3a2e1e59' }}
         />
       </FlexWidget>
-      <FlexWidget style={{ flexDirection: 'row', height: 3, borderRadius: 2 }}>
-        <FlexWidget style={{ flex: pct, backgroundColor: '#b5533c', borderRadius: 2 }} />
+      <FlexWidget style={{ flexDirection: 'row', height: 2, borderRadius: 1 }}>
+        <FlexWidget style={{ flex: pct,   backgroundColor: '#b5533c', borderRadius: 1 }} />
         <FlexWidget style={{ flex: empty, backgroundColor: '#3a2e1e1f' }} />
       </FlexWidget>
     </FlexWidget>
