@@ -54,15 +54,15 @@ export function DeathCounterWidget({ days, months, pct, lang }: Props) {
   return (
     <FlexWidget style={{ width: 'match_parent', height: 'match_parent', flexDirection: 'column', backgroundColor: C.bg, borderRadius: C.radius, padding: C.padding, justifyContent: 'space-between' }}>
 
-      <FlexWidget style={{ flexDirection: 'column' }}>
+      <FlexWidget style={{ flexDirection: 'column', width: 'match_parent' }}>
         {/* Header */}
-        <FlexWidget style={{ flexDirection: 'row', alignItems: 'center', marginBottom: C.headerMb }}>
+        <FlexWidget style={{ flexDirection: 'row', width: 'match_parent', alignItems: 'center', marginBottom: C.headerMb }}>
           <ImageWidget image={require('../../assets/adaptive-icon.png')} imageWidth={C.logoSize} imageHeight={C.logoSize} radius={C.logoRadius} />
           <TextWidget text={isZh ? '  人生计数器' : '  LIFE COUNTER'} style={{ fontFamily: 'monospace', fontSize: C.appLabelSize, color: C.muted80, letterSpacing: 1 }} />
         </FlexWidget>
 
         {/* Numbers */}
-        <FlexWidget style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <FlexWidget style={{ flexDirection: 'row', width: 'match_parent', alignItems: 'center' }}>
           <FlexWidget style={{ flex: 1, flexDirection: 'column' }}>
             <TextWidget text={isZh ? '天数' : 'DAYS'} style={{ fontFamily: 'monospace', fontSize: C.numLabelSize, color: C.muted80, letterSpacing: 1 }} />
             <TextWidget text={daysStr} style={{ fontFamily: 'serif', fontSize: C.numValueSize, color: C.fg }} />
@@ -76,13 +76,13 @@ export function DeathCounterWidget({ days, months, pct, lang }: Props) {
       </FlexWidget>
 
       {/* Progress */}
-      <FlexWidget style={{ flexDirection: 'column' }}>
-        <FlexWidget style={{ flexDirection: 'row', marginBottom: C.progressMb }}>
+      <FlexWidget style={{ flexDirection: 'column', width: 'match_parent' }}>
+        <FlexWidget style={{ flexDirection: 'row', width: 'match_parent', marginBottom: C.progressMb }}>
           <TextWidget text="LIFE PROGRESS" style={{ fontFamily: 'monospace', fontSize: C.progressLabelSize, color: C.muted73, letterSpacing: 1 }} />
           <FlexWidget style={{ flex: 1 }} />
           <TextWidget text={`${pctStr}%`} style={{ fontFamily: 'monospace', fontSize: C.progressLabelSize, color: C.accent }} />
         </FlexWidget>
-        <FlexWidget style={{ flexDirection: 'row', height: C.barHeight, borderRadius: C.barRadius }}>
+        <FlexWidget style={{ flexDirection: 'row', width: 'match_parent', height: C.barHeight, borderRadius: C.barRadius }}>
           <FlexWidget style={{ flex: filled, backgroundColor: C.accent, borderRadius: C.barRadius }} />
           <FlexWidget style={{ flex: empty,  backgroundColor: C.barEmpty }} />
         </FlexWidget>
