@@ -41,7 +41,7 @@
               "name": "DeathCounterWidget",
               "label": "D/C · Life",
               "minWidth": "250dp",
-              "minHeight": "110dp",
+              "minHeight": "140dp",
               "description": "Days, months and life progress",
               "previewImage": "./assets/adaptive-icon.png",
               "targetCellWidth": 4,
