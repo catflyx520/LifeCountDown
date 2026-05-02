@@ -1,21 +1,33 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { FlexWidget, TextWidget } from 'react-native-android-widget';
+import { View, Text, Image, StyleSheet } from 'react-native';
+import { FlexWidget, TextWidget, ImageWidget } from 'react-native-android-widget';
 import { fonts } from '../theme';
 
+// ── Shared colors + structure ─────────────────────────────────────────────────
 const C = {
   bg:       '#f5ecd6',
   accent:   '#b5533c',
-  muted80:  '#3a2e1e80',
   muted59:  '#3a2e1e59',
   barEmpty: '#ddd5c4',
-  padding:  14,
+  padding:  12,
   radius:   18,
-  labelSize: 7,
-  valueSize: 32,
-  subSize:   8,
-  barHeight: 4,
   barRadius: 2,
+} as const;
+
+// ── Widget sizes ──────────────────────────────────────────────────────────────
+const WS = {
+  logoSize:  30,
+  valueSize: 44,
+  subSize:   13,
+  barHeight: 8,
+} as const;
+
+// ── Preview sizes ─────────────────────────────────────────────────────────────
+const PS = {
+  logoSize:  24,
+  valueSize: 36,
+  subSize:   11,
+  barHeight: 6,
 } as const;
 
 function usedPct() {
@@ -33,16 +45,21 @@ export function TodayWidget({ lang }: Props) {
   const isZh  = lang === 'zh';
 
   return (
-    <FlexWidget style={{ width: 'match_parent', height: 'match_parent', flexDirection: 'column', backgroundColor: C.bg, borderRadius: C.radius, padding: C.padding, justifyContent: 'space-between' }}>
-      <TextWidget text={isZh ? '今日' : 'TODAY'} style={{ fontFamily: 'monospace', fontSize: C.labelSize, color: C.muted80, letterSpacing: 1 }} />
-      <FlexWidget style={{ flexDirection: 'column' }}>
-        <TextWidget text={`${used}%`} style={{ fontFamily: 'serif', fontSize: C.valueSize, color: C.accent }} />
-        <TextWidget text={isZh ? '已用' : 'used'} style={{ fontFamily: 'monospace', fontSize: C.subSize, color: C.muted59 }} />
-      </FlexWidget>
-      <FlexWidget style={{ flexDirection: 'row', width: 'match_parent', height: C.barHeight, borderRadius: C.barRadius }}>
+    <FlexWidget style={{ width: 'match_parent', height: 'match_parent', flexDirection: 'column', backgroundColor: C.bg, borderRadius: C.radius, padding: C.padding }}>
+
+      {/* Logo */}
+      <ImageWidget image={require('../../assets/adaptive-icon.png')} imageWidth={WS.logoSize} imageHeight={WS.logoSize} radius={4} />
+
+      {/* Value */}
+      <TextWidget text={`${used}%`} style={{ fontFamily: 'serif', fontSize: WS.valueSize, color: C.accent }} />
+      <TextWidget text={isZh ? '已用' : 'used'} style={{ fontFamily: 'monospace', fontSize: WS.subSize, color: C.muted59 }} />
+
+      {/* Bar */}
+      <FlexWidget style={{ flexDirection: 'row', width: 'match_parent', height: WS.barHeight, borderRadius: C.barRadius }}>
         <FlexWidget style={{ flex: used,  height: 'match_parent', backgroundColor: C.accent }} />
         <FlexWidget style={{ flex: empty, height: 'match_parent', backgroundColor: C.barEmpty }} />
       </FlexWidget>
+
     </FlexWidget>
   );
 }
@@ -54,13 +71,13 @@ export function TodayPreview({ lang }: Props) {
 
   return (
     <View style={[s.card, { padding: C.padding, borderRadius: C.radius, backgroundColor: C.bg }]}>
-      <Text style={{ fontFamily: fonts.mono, fontSize: C.labelSize, color: C.muted80, letterSpacing: 1 }}>{isZh ? '今日' : 'TODAY'}</Text>
+      <Image source={require('../../assets/adaptive-icon.png')} style={{ width: PS.logoSize, height: PS.logoSize, borderRadius: 4 }} resizeMode="contain" />
       <View>
-        <Text style={{ fontFamily: fonts.serif, fontSize: C.valueSize, color: C.accent, lineHeight: C.valueSize + 2 }}>{used}%</Text>
-        <Text style={{ fontFamily: fonts.mono, fontSize: C.subSize, color: C.muted59 }}>{isZh ? '已用' : 'used'}</Text>
+        <Text style={{ fontFamily: fonts.serif, fontSize: PS.valueSize, color: C.accent, lineHeight: PS.valueSize + 4 }}>{used}%</Text>
+        <Text style={{ fontFamily: fonts.mono, fontSize: PS.subSize, color: C.muted59 }}>{isZh ? '已用' : 'used'}</Text>
       </View>
-      <View style={{ height: C.barHeight, borderRadius: C.barRadius, backgroundColor: C.barEmpty, overflow: 'hidden' }}>
-        <View style={{ width: `${used}%` as any, height: '100%', backgroundColor: C.accent, borderRadius: C.barRadius }} />
+      <View style={{ height: PS.barHeight, borderRadius: C.barRadius, backgroundColor: C.barEmpty, overflow: 'hidden' }}>
+        <View style={{ width: `${used}%` as any, height: '100%', backgroundColor: C.accent }} />
       </View>
     </View>
   );
