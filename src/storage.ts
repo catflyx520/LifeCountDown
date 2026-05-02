@@ -60,7 +60,8 @@ export function ageFromBirthdate(birthdate: string): number {
 const QUOTE_KEY = '@lifecountdown/daily-quote';
 
 export async function getDailyQuoteIndex(total: number): Promise<number> {
-  const today = new Date().toISOString().slice(0, 10);
+  const d = new Date();
+  const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   try {
     const raw = await AsyncStorage.getItem(QUOTE_KEY);
     if (raw) {
