@@ -18,8 +18,8 @@ const C = {
 // ── Widget sizes ──────────────────────────────────────────────────────────────
 const WS = {
   logoSize:  30,
-  valueSize: 44,
-  subSize:   13,
+  valueSize: 45,
+  subSize:   14,
   barHeight: 8,
 } as const;
 
@@ -46,6 +46,7 @@ export function YearWidget({ dayOfYear, lang }: Props) {
 
       {/* Value */}
       <TextWidget text={String(dayOfYear)} style={{ fontFamily: 'serif', fontSize: WS.valueSize, color: C.fg }} />
+      <TextWidget text={lang === 'zh' ? '今年已用' : 'year used'} style={{ fontFamily: 'monospace', fontSize: WS.subSize, color: C.muted59 }} />
       <TextWidget text="/ 365" style={{ fontFamily: 'monospace', fontSize: WS.subSize, color: C.muted59 }} />
 
       {/* Bar */}
@@ -67,6 +68,7 @@ export function YearPreview({ dayOfYear, lang }: Props) {
       <Image source={require('../../assets/adaptive-icon.png')} style={{ width: PS.logoSize, height: PS.logoSize, borderRadius: 4 }} resizeMode="contain" />
       <View>
         <Text style={{ fontFamily: fonts.serif, fontSize: PS.valueSize, color: C.fg, lineHeight: PS.valueSize + 4 }}>{dayOfYear}</Text>
+        <Text style={{ fontFamily: fonts.mono, fontSize: PS.subSize, color: C.muted59 }}>{lang === 'zh' ? '今年已用' : 'year used'}</Text>
         <Text style={{ fontFamily: fonts.mono, fontSize: PS.subSize, color: C.muted59 }}>/ 365</Text>
       </View>
       <View style={{ height: PS.barHeight, borderRadius: C.barRadius, backgroundColor: C.barEmpty, overflow: 'hidden' }}>
