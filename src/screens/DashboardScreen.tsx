@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, RefreshControl } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, RefreshControl, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { theme, fonts } from '../theme';
@@ -50,6 +50,19 @@ export default function DashboardScreen() {
   }, []);
 
   useFocusEffect(reload);
+
+  // Navigate to Today when notification is tapped
+  useEffect(() => {
+    if (Platform.OS === 'web') return;
+    let sub: any;
+    try {
+      const Notifications = require('expo-notifications');
+      sub = Notifications.addNotificationResponseReceivedListener(() => {
+        navigation.navigate('Today');
+      });
+    } catch {}
+    return () => sub?.remove();
+  }, []);
 
   if (!user) return null;
 
@@ -181,6 +194,16 @@ export default function DashboardScreen() {
         style={styles.hourglassLink}
       >
         <Eyebrow style={{ color: theme.accent }}>{s.viewHourglass}</Eyebrow>
+      </TouchableOpacity>
+
+      {/* today */}
+      <TouchableOpacity
+        onPress={() => navigation.navigate('Today')}
+        style={[styles.hourglassLink, { marginTop: 8 }]}
+      >
+        <Eyebrow style={{ color: theme.accent }}>
+          {s.todaysNote} →
+        </Eyebrow>
       </TouchableOpacity>
 
       {/* widget preview */}

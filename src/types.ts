@@ -31,6 +31,7 @@ export type RootStackParamList = {
   Main: undefined;
   Hourglass: undefined;
   WidgetPreview: undefined;
+  Today: undefined;
 };
 
 export type MainTabParamList = {
