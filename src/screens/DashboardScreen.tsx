@@ -6,9 +6,10 @@ import { theme, fonts } from '../theme';
 import { Eyebrow, SerifText, Card, MonoText } from '../components/UI';
 import AnimatedHourglass from '../components/AnimatedHourglass';
 import { useCountdown } from '../hooks/useCountdown';
-import { loadUser, ageFromBirthdate, daysUntilBirthday } from '../storage';
+import { loadUser, ageFromBirthdate, daysUntilBirthday, getDailyQuoteIndex } from '../storage';
 import { UserData } from '../types';
-import { useT } from '../i18n';
+import { useT, rawDashQuotes } from '../i18n';
+import { buildDailyMessage } from '../utils/dailyMessage';
 
 function DashHourglass() {
   const [fillPct, setFillPct] = useState(() => {
@@ -27,24 +28,26 @@ function DashHourglass() {
   return <AnimatedHourglass size={110} fillPct={fillPct} animate grainMs={1400} />;
 }
 
-function StatRow({ label, value, sub }: { label: string; value: string; sub?: string }) {
+function StatRow({ label, value, sub, pct }: { label: string; value: string; sub?: string; pct: number }) {
   return (
-    <View style={rowStyles.row}>
-      <View style={{ flex: 1 }}>
-        <Eyebrow style={{ fontSize: 9, marginBottom: 2 }}>{label}</Eyebrow>
-        {sub && <MonoText style={{ fontSize: 9, color: theme.muted }}>{sub}</MonoText>}
+    <View style={{ paddingVertical: 14 }}>
+      <View style={rowStyles.top}>
+        <Eyebrow style={{ fontSize: 9 }}>{label}</Eyebrow>
+        <Text style={rowStyles.value}>{value}</Text>
       </View>
-      <Text style={rowStyles.value}>{value}</Text>
+      {sub && <MonoText style={{ fontSize: 9, color: theme.muted, marginBottom: 8 }}>{sub}</MonoText>}
+      <View style={rowStyles.track}>
+        <View style={[rowStyles.fill, { width: `${pct}%` as any }]} />
+      </View>
     </View>
   );
 }
 
 const rowStyles = StyleSheet.create({
-  row: {
-    flexDirection: 'row', alignItems: 'center',
-    justifyContent: 'space-between', paddingVertical: 14,
-  },
+  top: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
   value: { fontFamily: fonts.serif, fontSize: 24, color: theme.fg },
+  track: { height: 3, backgroundColor: theme.border, borderRadius: 2, overflow: 'hidden' },
+  fill: { height: '100%', backgroundColor: theme.accent, borderRadius: 2 },
 });
 
 export default function DashboardScreen() {
@@ -52,12 +55,19 @@ export default function DashboardScreen() {
   const { s, lang } = useT();
 
   const [user, setUser] = useState<UserData | null>(null);
+  const [message, setMessage] = useState<{ title: string; body: string } | null>(null);
   const countdown = useCountdown();
   const navigation = useNavigation<any>();
 
   const reload = useCallback(() => {
-    loadUser().then(setUser);
-  }, []);
+    loadUser().then(u => {
+      setUser(u);
+      const quotes = rawDashQuotes[lang as 'en' | 'zh'];
+      getDailyQuoteIndex(quotes.length).then(index => {
+        setMessage(buildDailyMessage(u, lang, quotes[index]));
+      });
+    });
+  }, [lang]);
 
   useFocusEffect(reload);
 
@@ -93,12 +103,6 @@ export default function DashboardScreen() {
     ? s.goodToSeeNamed(user.name).replace('\n', ' ')
     : s.goodToSee;
 
-  const bars = [
-    { label: lang === 'zh' ? '今日' : 'Today', pct: todayUsed },
-    { label: lang === 'zh' ? '今年' : 'Year', pct: yearPct },
-    { label: lang === 'zh' ? '人生' : 'Life', pct: lifePct },
-  ];
-
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: theme.bg }}
@@ -123,7 +127,6 @@ export default function DashboardScreen() {
       {/* hourglass + countdown */}
       <View style={styles.heroSection}>
         <DashHourglass />
-
         <View style={styles.countdownCard}>
           <Eyebrow style={{ fontSize: 8, marginBottom: 4 }}>{s.todayEndsIn}</Eyebrow>
           <Text style={styles.countdown}>{countdown}</Text>
@@ -160,41 +163,40 @@ export default function DashboardScreen() {
         </View>
       </Card>
 
-      {/* stats */}
+      {/* stats + inline bars */}
       <View style={styles.statsCard}>
         <StatRow
           label={lang === 'zh' ? '今日已用' : 'Today used'}
           value={`${todayUsed}%`}
           sub={lang === 'zh' ? `${secsSinceMidnight.toLocaleString()} 秒已过` : `${secsSinceMidnight.toLocaleString()}s elapsed`}
+          pct={todayUsed}
         />
         <View style={styles.divider} />
         <StatRow
           label={lang === 'zh' ? '今年进度' : 'Year progress'}
           value={`${doy} / 365`}
           sub={`${yearPct}%`}
+          pct={yearPct}
         />
         <View style={styles.divider} />
         <StatRow
           label={lang === 'zh' ? '人生进度' : 'Life progress'}
           value={`${lifePct.toFixed(1)}%`}
           sub={lang === 'zh' ? `还剩 ${user.daysLeft.toLocaleString()} 天` : `${user.daysLeft.toLocaleString()} days left`}
+          pct={lifePct}
         />
       </View>
 
-      {/* progress bars */}
-      <View style={styles.barsCard}>
-        {bars.map((b, i) => (
-          <View key={i} style={{ marginBottom: i < 2 ? 14 : 0 }}>
-            <View style={styles.barLabelRow}>
-              <Eyebrow style={{ fontSize: 9 }}>{b.label}</Eyebrow>
-              <MonoText style={{ fontSize: 9 }}>{b.pct.toFixed(b.label === 'Life' || b.label === '人生' ? 1 : 0)}%</MonoText>
-            </View>
-            <View style={styles.track}>
-              <View style={[styles.fill, { width: `${b.pct}%` as any }]} />
-            </View>
-          </View>
-        ))}
-      </View>
+      {/* daily message */}
+      {message && (
+        <View style={styles.messageCard}>
+          <Eyebrow style={{ marginBottom: 10 }}>
+            {lang === 'zh' ? '今日格言' : "Today's note"}
+          </Eyebrow>
+          <Text style={styles.messageTitle}>{message.title}</Text>
+          <Text style={styles.messageBody}>{message.body}</Text>
+        </View>
+      )}
 
       {/* links */}
       <TouchableOpacity
@@ -208,9 +210,7 @@ export default function DashboardScreen() {
         onPress={() => navigation.navigate('Today')}
         style={[styles.link, { marginTop: 8 }]}
       >
-        <Eyebrow style={{ color: theme.accent }}>
-          {s.todaysNote} →
-        </Eyebrow>
+        <Eyebrow style={{ color: theme.accent }}>{s.todaysNote} →</Eyebrow>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -248,14 +248,19 @@ const styles = StyleSheet.create({
   },
   divider: { height: 1, backgroundColor: theme.border },
 
-  barsCard: {
+  messageCard: {
     backgroundColor: theme.surface, borderRadius: 16,
     borderWidth: 1, borderColor: theme.border,
     padding: 16, marginBottom: 10,
   },
-  barLabelRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
-  track: { height: 3, backgroundColor: theme.border, borderRadius: 2, overflow: 'hidden' },
-  fill: { height: '100%', backgroundColor: theme.accent, borderRadius: 2 },
+  messageTitle: {
+    fontFamily: fonts.serif, fontSize: 22, color: theme.fg,
+    lineHeight: 28, marginBottom: 10,
+  },
+  messageBody: {
+    fontFamily: fonts.body, fontSize: 14, color: theme.muted,
+    lineHeight: 22,
+  },
 
   link: {
     alignItems: 'center', paddingVertical: 14,
