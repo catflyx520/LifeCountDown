@@ -12,12 +12,6 @@ import { useT } from '../i18n';
 
 type Props = { navigation: NativeStackNavigationProp<RootStackParamList, 'Age'> };
 
-const QUOTES = [
-  { t: "It is not that we have a short time to live, but that we waste a lot of it.", a: "Seneca" },
-  { t: "You could leave life right now. Let that determine what you do.", a: "Marcus Aurelius" },
-  { t: "As long as you live, keep learning how to live.", a: "Seneca" },
-  { t: "The life of the dead is placed in the memory of the living.", a: "Cicero" },
-];
 
 function calcAge(year: number, month: number, day: number): number {
   const bd = new Date(year, month - 1, day);
@@ -51,7 +45,7 @@ export default function AgeScreen({ navigation }: Props) {
     });
   }, []);
 
-  const quote = QUOTES[age % QUOTES.length];
+  const quote = s.onboardingQuotes[age % s.onboardingQuotes.length];
 
   const panResponder = useRef(
     PanResponder.create({
