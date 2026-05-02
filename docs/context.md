@@ -1,6 +1,6 @@
 # Development Context
 
-> Claude reads this automatically at session start. Last updated: 2026-04-28.
+> Claude reads this automatically at session start. Last updated: 2026-05-01.
 
 ## Project
 
@@ -74,10 +74,25 @@
 - `buildDailyMessage(user, lang, quote?)` → `{ title, body }`
 - Used by both notifications and test button
 
+## Today Screen (`src/screens/TodayScreen.tsx`)
+
+- Created as a dedicated daily focus page: date, countdown, stats (今日已用/今年进度/人生进度), 3 progress bars, daily message
+- Accessible from Dashboard "Today's note →" link and from notification taps
+- Has its own local `useCountdown` hook (same logic as the shared one)
+
+## Dashboard (latest state)
+
+Refactored layout:
+- One-line greeting (name inline, no newline)
+- Hourglass + countdown only in hero section (removed big days/months numbers + ≈ yrs line)
+- Age card (you are X yrs | target/next birthday)
+- Stats card: StatRow for 今日已用 / 今年进度 / 人生进度
+- Progress bars card: Today / Year / Life bars (same as TodayScreen)
+- Links: Hourglass, Today, Widget Preview
+
 ## What to do next
 
 1. Widget bar visibility confirmed fixed — test on device by removing + re-adding widget
-2. Adjust widget font sizes / layout via Widget Preview screen, then sync to widget components
-3. Community STREAKS and cohort values — replace with real data once Firebase Auth exists
-4. Decide on Firebase Auth (real user accounts) vs staying anonymous
-5. `@anthropic-ai/sdk` in dependencies, not yet wired up
+2. Community STREAKS and cohort values — replace with real data once Firebase Auth exists
+3. Decide on Firebase Auth (real user accounts) vs staying anonymous
+4. `@anthropic-ai/sdk` in dependencies, not yet wired up

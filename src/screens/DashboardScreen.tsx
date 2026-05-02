@@ -6,14 +6,9 @@ import { theme, fonts } from '../theme';
 import { Eyebrow, SerifText, Card, MonoText } from '../components/UI';
 import AnimatedHourglass from '../components/AnimatedHourglass';
 import { useCountdown } from '../hooks/useCountdown';
-import { loadUser, ageFromBirthdate, daysUntilBirthday, getDailyQuoteIndex } from '../storage';
+import { loadUser, ageFromBirthdate, daysUntilBirthday } from '../storage';
 import { UserData } from '../types';
 import { useT } from '../i18n';
-
-
-function fmt(n: number) {
-  return n.toLocaleString('en-US');
-}
 
 function DashHourglass() {
   const [fillPct, setFillPct] = useState(() => {
@@ -32,18 +27,33 @@ function DashHourglass() {
   return <AnimatedHourglass size={110} fillPct={fillPct} animate grainMs={1400} />;
 }
 
+function StatRow({ label, value, sub }: { label: string; value: string; sub?: string }) {
+  return (
+    <View style={rowStyles.row}>
+      <View style={{ flex: 1 }}>
+        <Eyebrow style={{ fontSize: 9, marginBottom: 2 }}>{label}</Eyebrow>
+        {sub && <MonoText style={{ fontSize: 9, color: theme.muted }}>{sub}</MonoText>}
+      </View>
+      <Text style={rowStyles.value}>{value}</Text>
+    </View>
+  );
+}
+
+const rowStyles = StyleSheet.create({
+  row: {
+    flexDirection: 'row', alignItems: 'center',
+    justifyContent: 'space-between', paddingVertical: 14,
+  },
+  value: { fontFamily: fonts.serif, fontSize: 24, color: theme.fg },
+});
+
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
-  const { s } = useT();
+  const { s, lang } = useT();
 
   const [user, setUser] = useState<UserData | null>(null);
-  const [quoteIndex, setQuoteIndex] = useState(0);
   const countdown = useCountdown();
   const navigation = useNavigation<any>();
-
-  useEffect(() => {
-    getDailyQuoteIndex(s.dashQuotes.length).then(setQuoteIndex);
-  }, []);
 
   const reload = useCallback(() => {
     loadUser().then(setUser);
@@ -51,7 +61,6 @@ export default function DashboardScreen() {
 
   useFocusEffect(reload);
 
-  // Navigate to Today when notification is tapped
   useEffect(() => {
     if (Platform.OS === 'web') return;
     let sub: any;
@@ -66,17 +75,29 @@ export default function DashboardScreen() {
 
   if (!user) return null;
 
-  const days = user.daysLeft;
+  const now = new Date();
+  const doy = Math.ceil((now.getTime() - new Date(now.getFullYear(), 0, 1).getTime()) / 86400000);
+  const secsSinceMidnight = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+  const todayUsed = Math.round((secsSinceMidnight / 86400) * 100);
+
   const totalDays = user.targetAge * 365;
-  const elapsed = user.age * 365;
-  const pct = Math.min(100, (elapsed / totalDays) * 100);
-  const dayOfYear = Math.ceil((Date.now() - new Date(new Date().getFullYear(), 0, 1).getTime()) / 86400000);
-  const quote = s.dashQuotes[quoteIndex];
+  const lifePct = Math.min(100, (user.age * 365 / totalDays) * 100);
+  const yearPct = Math.round((doy / 365) * 100);
 
   const displayAge = user.birthdate ? ageFromBirthdate(user.birthdate) : user.age;
   const nextBday = user.birthdate ? daysUntilBirthday(user.birthdate) : null;
 
-  const today = new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' });
+  const today = now.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' });
+
+  const greeting = user.name
+    ? s.goodToSeeNamed(user.name).replace('\n', ' ')
+    : s.goodToSee;
+
+  const bars = [
+    { label: lang === 'zh' ? '今日' : 'Today', pct: todayUsed },
+    { label: lang === 'zh' ? '今年' : 'Year', pct: yearPct },
+    { label: lang === 'zh' ? '人生' : 'Life', pct: lifePct },
+  ];
 
   return (
     <ScrollView
@@ -96,44 +117,16 @@ export default function DashboardScreen() {
 
       {/* greeting */}
       <SerifText size={22} style={{ marginBottom: 16, lineHeight: 28 }}>
-        {user.name ? s.goodToSeeNamed(user.name) : s.goodToSee}
+        {greeting}
       </SerifText>
 
-      {/* hourglass + hero numbers */}
+      {/* hourglass + countdown */}
       <View style={styles.heroSection}>
         <DashHourglass />
 
-        <View style={styles.heroNumbers}>
-          <View style={styles.heroCol}>
-            <Eyebrow style={{ fontSize: 8, marginBottom: 4 }}>{s.daysRemaining}</Eyebrow>
-            <Text style={styles.bigNumber}>{fmt(days)}</Text>
-          </View>
-          <View style={styles.separator} />
-          <View style={styles.heroCol}>
-            <Eyebrow style={{ fontSize: 8, marginBottom: 4 }}>{s.monthsRemaining}</Eyebrow>
-            <Text style={styles.bigNumber}>{fmt(Math.floor(days / 30.44))}</Text>
-          </View>
-        </View>
-
-        <Eyebrow style={{ textAlign: 'center', marginTop: -4 }}>
-          ≈ {Math.floor(days / 365)} {s.yrs} · {Math.floor((days % 365) / 30)} {s.mo} · {days % 30} d
-        </Eyebrow>
-
-        {/* countdown pill */}
         <View style={styles.countdownCard}>
           <Eyebrow style={{ fontSize: 8, marginBottom: 4 }}>{s.todayEndsIn}</Eyebrow>
           <Text style={styles.countdown}>{countdown}</Text>
-        </View>
-      </View>
-
-      {/* life progress */}
-      <View style={styles.progressSection}>
-        <View style={styles.progressRow}>
-          <Eyebrow style={{ fontSize: 9 }}>{s.lifeProgress}</Eyebrow>
-          <Eyebrow style={{ fontSize: 9 }}>{pct.toFixed(1)}%</Eyebrow>
-        </View>
-        <View style={styles.progressTrack}>
-          <View style={[styles.progressFill, { width: `${pct}%` }]} />
         </View>
       </View>
 
@@ -167,49 +160,62 @@ export default function DashboardScreen() {
         </View>
       </Card>
 
-      {/* quote */}
-      <Card style={{ marginBottom: 10 }}>
-        <Eyebrow style={{ marginBottom: 8 }}>
-          {user.name ? s.forNamed(user.name) : s.todaysNote}
-        </Eyebrow>
-        <Text style={styles.quoteText}>"{quote.text}"</Text>
-        <Text style={styles.quoteAuthor}>— {quote.author.toUpperCase()}</Text>
-      </Card>
-
-      {/* stat grid */}
-      <View style={styles.grid}>
-        <StatCard label={s.dayOfYear}  value={dayOfYear}             unit="/ 365" />
-        <StatCard label={s.yearsLeft}  value={Math.floor(days / 365)} unit={s.approx} />
-        <StatCard label={s.target}     value={user.targetAge}         unit={s.yrs} />
-        <StatCard
-          label={s.confidence}
-          value={user.mode === 'ai' ? `${user.confidence}%` : '—'}
-          unit={user.mode === 'ai' ? s.aiEstimate : s.userSet}
+      {/* stats */}
+      <View style={styles.statsCard}>
+        <StatRow
+          label={lang === 'zh' ? '今日已用' : 'Today used'}
+          value={`${todayUsed}%`}
+          sub={lang === 'zh' ? `${secsSinceMidnight.toLocaleString()} 秒已过` : `${secsSinceMidnight.toLocaleString()}s elapsed`}
+        />
+        <View style={styles.divider} />
+        <StatRow
+          label={lang === 'zh' ? '今年进度' : 'Year progress'}
+          value={`${doy} / 365`}
+          sub={`${yearPct}%`}
+        />
+        <View style={styles.divider} />
+        <StatRow
+          label={lang === 'zh' ? '人生进度' : 'Life progress'}
+          value={`${lifePct.toFixed(1)}%`}
+          sub={lang === 'zh' ? `还剩 ${user.daysLeft.toLocaleString()} 天` : `${user.daysLeft.toLocaleString()} days left`}
         />
       </View>
 
-      {/* hourglass link */}
+      {/* progress bars */}
+      <View style={styles.barsCard}>
+        {bars.map((b, i) => (
+          <View key={i} style={{ marginBottom: i < 2 ? 14 : 0 }}>
+            <View style={styles.barLabelRow}>
+              <Eyebrow style={{ fontSize: 9 }}>{b.label}</Eyebrow>
+              <MonoText style={{ fontSize: 9 }}>{b.pct.toFixed(b.label === 'Life' || b.label === '人生' ? 1 : 0)}%</MonoText>
+            </View>
+            <View style={styles.track}>
+              <View style={[styles.fill, { width: `${b.pct}%` as any }]} />
+            </View>
+          </View>
+        ))}
+      </View>
+
+      {/* links */}
       <TouchableOpacity
         onPress={() => navigation.navigate('Hourglass')}
-        style={styles.hourglassLink}
+        style={styles.link}
       >
         <Eyebrow style={{ color: theme.accent }}>{s.viewHourglass}</Eyebrow>
       </TouchableOpacity>
 
-      {/* today */}
       <TouchableOpacity
         onPress={() => navigation.navigate('Today')}
-        style={[styles.hourglassLink, { marginTop: 8 }]}
+        style={[styles.link, { marginTop: 8 }]}
       >
         <Eyebrow style={{ color: theme.accent }}>
           {s.todaysNote} →
         </Eyebrow>
       </TouchableOpacity>
 
-      {/* widget preview */}
       <TouchableOpacity
         onPress={() => navigation.navigate('WidgetPreview')}
-        style={[styles.hourglassLink, { marginTop: 8 }]}
+        style={[styles.link, { marginTop: 8 }]}
       >
         <Eyebrow style={{ color: theme.accent }}>Widget Preview →</Eyebrow>
       </TouchableOpacity>
@@ -217,36 +223,12 @@ export default function DashboardScreen() {
   );
 }
 
-function StatCard({ label, value, unit }: { label: string; value: string | number; unit: string }) {
-  return (
-    <View style={statStyles.card}>
-      <Eyebrow style={{ fontSize: 9, marginBottom: 8 }}>{label}</Eyebrow>
-      <Text style={statStyles.value}>{value}</Text>
-      <Text style={statStyles.unit}>{unit}</Text>
-    </View>
-  );
-}
-
-const statStyles = StyleSheet.create({
-  card: {
-    width: '48%', padding: 14, borderRadius: 12,
-    backgroundColor: theme.surface, borderWidth: 1, borderColor: theme.border,
-    marginBottom: 10,
-  },
-  value: { fontFamily: fonts.serif, fontSize: 26, color: theme.fg, lineHeight: 28 },
-  unit: { fontFamily: fonts.mono, fontSize: 9, color: theme.muted, letterSpacing: 1.2, marginTop: 4 },
-});
-
 const styles = StyleSheet.create({
   topBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   livePip: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: theme.accent },
 
-  heroSection: { alignItems: 'center', paddingVertical: 16, gap: 12 },
-  heroNumbers: { flexDirection: 'row', alignItems: 'center', gap: 0 },
-  heroCol: { flex: 1, alignItems: 'center' },
-  separator: { width: 1, height: 60, backgroundColor: theme.border },
-  bigNumber: { fontFamily: fonts.serif, fontSize: 48, lineHeight: 52, color: theme.fg, letterSpacing: -2 },
+  heroSection: { alignItems: 'center', paddingVertical: 16, gap: 12, marginBottom: 10 },
 
   countdownCard: {
     paddingHorizontal: 24, paddingVertical: 10,
@@ -256,20 +238,26 @@ const styles = StyleSheet.create({
   },
   countdown: { fontFamily: fonts.mono, fontSize: 26, letterSpacing: 2, color: theme.accent },
 
-  progressSection: { marginBottom: 16 },
-  progressRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
-  progressTrack: { height: 2, backgroundColor: theme.border, borderRadius: 2, overflow: 'hidden' },
-  progressFill: { height: '100%', backgroundColor: theme.accent },
-
   ageNumber: { fontFamily: fonts.serif, fontSize: 40, lineHeight: 42, color: theme.fg },
   sideNumber: { fontFamily: fonts.serif, fontSize: 22, color: theme.fg },
 
-  quoteText: { fontFamily: fonts.serifItalic, fontSize: 16, lineHeight: 22, color: theme.fg, marginBottom: 8 },
-  quoteAuthor: { fontFamily: fonts.mono, fontSize: 10, color: theme.muted, letterSpacing: 1.5 },
+  statsCard: {
+    backgroundColor: theme.surface, borderRadius: 16,
+    borderWidth: 1, borderColor: theme.border,
+    paddingHorizontal: 16, marginBottom: 10,
+  },
+  divider: { height: 1, backgroundColor: theme.border },
 
-  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
+  barsCard: {
+    backgroundColor: theme.surface, borderRadius: 16,
+    borderWidth: 1, borderColor: theme.border,
+    padding: 16, marginBottom: 10,
+  },
+  barLabelRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
+  track: { height: 3, backgroundColor: theme.border, borderRadius: 2, overflow: 'hidden' },
+  fill: { height: '100%', backgroundColor: theme.accent, borderRadius: 2 },
 
-  hourglassLink: {
+  link: {
     alignItems: 'center', paddingVertical: 14,
     borderRadius: 12, backgroundColor: theme.surface,
     borderWidth: 1, borderColor: theme.border, marginTop: 4,
