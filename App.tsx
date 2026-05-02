@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, StyleSheet } from 'react-native';
+import { Animated, StyleSheet, View, Platform } from 'react-native';
 import {
   useFonts,
   InstrumentSerif_400Regular,
@@ -43,7 +43,7 @@ export default function App() {
     return () => clearTimeout(t);
   }, [fontsLoaded]);
 
-  return (
+  const inner = (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <LanguageProvider>
@@ -57,4 +57,29 @@ export default function App() {
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
+
+  if (Platform.OS === 'web') {
+    return (
+      <View style={styles.webOuter}>
+        <View style={styles.webPhone}>{inner}</View>
+      </View>
+    );
+  }
+
+  return inner;
 }
+
+const styles = StyleSheet.create({
+  webOuter: {
+    flex: 1,
+    alignItems: 'center',
+    backgroundColor: '#1c1c1c',
+  },
+  webPhone: {
+    width: 400,
+    flex: 1,
+    overflow: 'hidden',
+    // @ts-ignore — web-only shadow
+    boxShadow: '0 0 60px rgba(0,0,0,0.5)',
+  },
+});
