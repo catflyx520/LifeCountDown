@@ -20,7 +20,7 @@ const WS = {
   logoSize:    30,
   valueSize:   44,
   subSize:     12,
-  countdownSize: 11,
+  countdownSize: 13,
   barHeight:   7,
 } as const;
 
