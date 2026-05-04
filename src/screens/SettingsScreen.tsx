@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Modal,
+  View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Modal, Linking,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -240,7 +240,16 @@ export default function SettingsScreen() {
         </View>
       </Modal>
 
-      <MonoText style={{ textAlign: 'center', marginTop: 24, fontSize: 9 }}>
+      <TouchableOpacity
+        onPress={() => Linking.openURL('https://catflyx520.github.io/LifeCountDown/privacy.html')}
+        style={{ alignItems: 'center', marginTop: 16 }}
+      >
+        <MonoText style={{ fontSize: 9, color: theme.accent, letterSpacing: 1.5 }}>
+          {s.privacyPolicy} →
+        </MonoText>
+      </TouchableOpacity>
+
+      <MonoText style={{ textAlign: 'center', marginTop: 12, fontSize: 9 }}>
         {s.versionNote}
       </MonoText>
     </ScrollView>
