@@ -1,6 +1,6 @@
 # Development Context
 
-> Claude reads this automatically at session start. Last updated: 2026-05-01.
+> Claude reads this automatically at session start. Last updated: 2026-05-05.
 
 ## Project
 
@@ -44,7 +44,8 @@
 - `expo-notifications` installed; plugin configured in `app.json` with white hourglass notification icon
 - Works in dev build (`expo-dev-client`), NOT in Expo Go (SDK 53+ limitation)
 - Notification format: title (stat hook) + body (1-2 sentences) + quote at bottom
-- 8 templates × 2 languages in `src/utils/dailyMessage.ts`, date-seeded random
+- 6 templates × 2 languages in `src/utils/dailyMessage.ts`, date-seeded random
+- Templates no longer include daysLeftInMonth (removed — now shown as Dashboard stat)
 - Settings: toggle On/Off + hour picker (7-21) + test button (fires in 2s)
 
 ## Home Screen Widgets (`src/widgets/`)
@@ -73,26 +74,50 @@
 
 - `buildDailyMessage(user, lang, quote?)` → `{ title, body }`
 - Used by both notifications and test button
-
-## Today Screen (`src/screens/TodayScreen.tsx`)
-
-- Created as a dedicated daily focus page: date, countdown, stats (今日已用/今年进度/人生进度), 3 progress bars, daily message
-- Accessible from Dashboard "Today's note →" link and from notification taps
-- Has its own local `useCountdown` hook (same logic as the shared one)
+- 6 templates per language (was 8; removed 2 that referenced daysLeftInMonth)
 
 ## Dashboard (latest state)
 
-Refactored layout:
-- One-line greeting (name inline, no newline)
-- Hourglass + countdown only in hero section (removed big days/months numbers + ≈ yrs line)
-- Age card (you are X yrs | target/next birthday)
-- Stats card: StatRow for 今日已用 / 今年进度 / 人生进度
-- Progress bars card: Today / Year / Life bars (same as TodayScreen)
-- Links: Hourglass, Today, Widget Preview
+- Top bar: `L/C · {date}`
+- Greeting (name inline)
+- Hourglass + countdown hero
+- Age card: you are X yrs | target or next birthday
+- Stats card: Days left in month / Year progress / Life progress (3 StatRows with inline bars)
+- Today's note card (daily message from `buildDailyMessage`)
+- Time Capsules card: label + `lettersToSelf` sub + big count number (moved from Settings)
+- Links: Hourglass →, Widget Preview →
+
+## Large number lineHeight fixes (onboarding clipping)
+
+All large serif numbers had `fontSize === lineHeight` which clipped the top. Fixed:
+- `AgeScreen` bigNumber: `lineHeight: 132` (fontSize 120)
+- `ManualScreen` bigTarget: `lineHeight: 112` (fontSize 100)
+- `ManualScreen` bigAge: `lineHeight: 82` (fontSize 72)
+- `QuizScreen` bigAge: `lineHeight: 82` (fontSize 72)
+
+## EAS / Google Play publish setup (in progress)
+
+- EAS CLI installed, logged in
+- `eas.json` created (production profile, `app-bundle`)
+- EAS Secrets uploaded: all 8 `EXPO_PUBLIC_*` env vars
+- Google Play Developer account: registration in progress (payment pending)
+- Next step: run `eas build --platform android --profile production` once Play account is ready
+- Then: upload AAB to Google Play Console → Internal testing track
 
 ## What to do next
 
-1. Widget bar visibility confirmed fixed — test on device by removing + re-adding widget
-2. Community STREAKS and cohort values — replace with real data once Firebase Auth exists
-3. Decide on Firebase Auth (real user accounts) vs staying anonymous
-4. `@anthropic-ai/sdk` in dependencies, not yet wired up
+1. **Check-in feature** (designed, not yet built) — new tab replacing Figures:
+   - Monthly calendar view (mark checked-in days)
+   - Daily form: mood selection + satisfaction rating (1–5) + intention text input
+   - Data stored as `checkins: CheckIn[]` on `UserData`
+   - `CheckIn = { date: string, mood: string, rating: number, intention: string }`
+   - Dashboard gets a "Check in →" button linking to the tab
+
+2. **Community screen refactor** — add Quotes/Figures tab switcher:
+   - Top tabs: Quotes | Figures
+   - Figures content moved from FiguresScreen into Community
+   - Figures tab removed from bottom navigation
+
+3. Community STREAKS and cohort values — replace with real data once Firebase Auth exists
+4. Decide on Firebase Auth (real user accounts) vs staying anonymous
+5. `@anthropic-ai/sdk` in dependencies, not yet wired up

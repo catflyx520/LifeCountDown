@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
   toggleTextActive: { color: theme.accentFg },
 
   ageArea: { alignItems: 'center', paddingVertical: 24, gap: 8 },
-  bigNumber: { fontFamily: fonts.serif, fontSize: 120, lineHeight: 120, color: theme.fg, letterSpacing: -4 },
+  bigNumber: { fontFamily: fonts.serif, fontSize: 120, lineHeight: 132, color: theme.fg, letterSpacing: -4 },
   scrubber: {
     width: '100%', height: 52, borderRadius: 10,
     backgroundColor: theme.surface, borderWidth: 1, borderColor: theme.border,

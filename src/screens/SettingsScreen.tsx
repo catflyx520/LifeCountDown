@@ -139,15 +139,6 @@ export default function SettingsScreen() {
         <Text style={styles.actionBtnText}>{s.updateAge}</Text>
       </TouchableOpacity>
 
-      {/* capsule count */}
-      <Card style={{ marginTop: 16, marginBottom: 12, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <View>
-          <Eyebrow style={{ marginBottom: 4 }}>{s.timeCapsules}</Eyebrow>
-          <MonoText style={{ fontSize: 9 }}>{s.lettersToSelf}</MonoText>
-        </View>
-        <Text style={styles.bigCount}>{user.capsules?.length ?? 0}</Text>
-      </Card>
-
       {/* language */}
       <Card style={{ marginBottom: 12 }}>
         <Eyebrow style={{ marginBottom: 12 }}>{s.language}</Eyebrow>
@@ -276,7 +267,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   actionBtnText: { fontFamily: fonts.mono, fontSize: 10, color: theme.accent, letterSpacing: 1.5 },
-  bigCount: { fontFamily: fonts.serif, fontSize: 36, color: theme.fg },
   langRow: { flexDirection: 'row', gap: 10 },
   langBtn: {
     flex: 1, padding: 12, borderRadius: 10, alignItems: 'center',

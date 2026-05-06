@@ -224,8 +224,8 @@ function AgePicker({ value, min, max, onChange }: {
 const styles = StyleSheet.create({
   header: { paddingTop: 8, marginBottom: 16 },
   body: { flex: 1, justifyContent: 'center', gap: 28 },
-  bigTarget: { fontFamily: fonts.serif, fontSize: 100, lineHeight: 100, color: theme.accent, letterSpacing: -3 },
-  bigAge: { fontFamily: fonts.serif, fontSize: 72, lineHeight: 72, color: theme.accent, letterSpacing: -2, marginTop: 8 },
+  bigTarget: { fontFamily: fonts.serif, fontSize: 100, lineHeight: 112, color: theme.accent, letterSpacing: -3 },
+  bigAge: { fontFamily: fonts.serif, fontSize: 72, lineHeight: 82, color: theme.accent, letterSpacing: -2, marginTop: 8 },
   statRow: { flexDirection: 'row', gap: 8, marginBottom: 10 },
   statCell: {
     flex: 1, backgroundColor: theme.surface, borderRadius: 12,

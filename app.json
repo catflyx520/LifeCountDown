@@ -29,10 +29,13 @@
     },
     "plugins": [
       "expo-font",
-      ["expo-notifications", {
-        "icon": "./assets/notification-icon.png",
-        "color": "#b5533c"
-      }],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#b5533c"
+        }
+      ],
       [
         "react-native-android-widget",
         {
@@ -76,6 +79,12 @@
           ]
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "eb013f43-6f79-4150-b281-95fdcac8d120"
+      }
+    },
+    "owner": "catfly520"
   }
 }

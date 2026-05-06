@@ -32,6 +32,7 @@ export default function FiguresScreen() {
         data.sort((a, b) => a.died_age - b.died_age);
         setFigures(data);
       })
+      .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 

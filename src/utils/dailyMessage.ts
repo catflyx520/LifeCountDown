@@ -3,11 +3,6 @@ const weekdaysEn = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fri
 const monthsEn = ['January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'];
 
-function daysLeftInMonth(): number {
-  const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate() - now.getDate();
-}
-
 function dayOfYear(): number {
   const now = new Date();
   return Math.ceil((now.getTime() - new Date(now.getFullYear(), 0, 1).getTime()) / 86400000);
@@ -25,10 +20,8 @@ export function buildDailyMessage(
   const now = new Date();
   const today = now.toISOString().slice(0, 10);
 
-  const month     = now.getMonth() + 1;
   const weekday   = lang === 'zh' ? weekdaysZh[now.getDay()] : weekdaysEn[now.getDay()];
   const monthName = monthsEn[now.getMonth()];
-  const daysInMonth = daysLeftInMonth();
   const doy = dayOfYear();
 
   const days  = user.daysLeft;
@@ -43,10 +36,6 @@ export function buildDailyMessage(
     {
       title: `还剩 ${daysStr} 天。`,
       body: `早安。今年第 ${doy} 天。\n今天最重要的事是什么？`,
-    },
-    {
-      title: `${month}月还剩 ${daysInMonth} 天。`,
-      body: `${daysStr} 天还在。这个月快结束了。\n你在好好用吗？`,
     },
     {
       title: `人生进度 ${pct}%。`,
@@ -65,10 +54,6 @@ export function buildDailyMessage(
       body: `不是来吓你的，是提醒你——\n你还在，这就是一切。`,
     },
     {
-      title: `${month}月还剩 ${daysInMonth} 天。`,
-      body: `之后这个月就永远过去了。\n你想完成什么？`,
-    },
-    {
       title: `${pctRemaining}% 还在前方。`,
       body: `${pct}% 已过。剩下的还是你的。\n${weekday}——从这里开始。`,
     },
@@ -78,10 +63,6 @@ export function buildDailyMessage(
     {
       title: `${daysStr} days left.`,
       body: `Good morning. Day ${doy} of the year.\nWhat matters most today?`,
-    },
-    {
-      title: `${monthName} ends in ${daysInMonth} days.`,
-      body: `${daysStr} days remain. This month is almost done.\nAre you spending it well?`,
     },
     {
       title: `Life at ${pct}%.`,
@@ -98,10 +79,6 @@ export function buildDailyMessage(
     {
       title: `${years} years ${months} months left.`,
       body: `Not a warning — a reminder.\nYou're still here. That's everything.`,
-    },
-    {
-      title: `${daysInMonth} days left this month.`,
-      body: `After that, ${monthName} is gone forever.\nWhat do you want to finish?`,
     },
     {
       title: `${pctRemaining}% still ahead.`,

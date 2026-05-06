@@ -78,6 +78,10 @@ export default function DashboardScreen() {
   const secsSinceMidnight = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
   const todayUsed = Math.round((secsSinceMidnight / 86400) * 100);
 
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const daysLeftMonth = daysInMonth - now.getDate();
+  const monthUsedPct = Math.round(((now.getDate() - 1) / daysInMonth) * 100);
+
   const totalDays = user.targetAge * 365;
   const lifePct = Math.min(100, (user.age * 365 / totalDays) * 100);
   const yearPct = Math.round((doy / 365) * 100);
@@ -154,10 +158,10 @@ export default function DashboardScreen() {
       {/* stats + inline bars */}
       <View style={styles.statsCard}>
         <StatRow
-          label={lang === 'zh' ? '今日已用' : 'Today used'}
-          value={`${todayUsed}%`}
-          sub={lang === 'zh' ? `${secsSinceMidnight.toLocaleString()} 秒已过` : `${secsSinceMidnight.toLocaleString()}s elapsed`}
-          pct={todayUsed}
+          label={lang === 'zh' ? '本月剩余' : 'Days left in month'}
+          value={`${daysLeftMonth}`}
+          sub={lang === 'zh' ? `${now.getDate()} / ${daysInMonth} 天` : `${now.getDate()} / ${daysInMonth} days`}
+          pct={monthUsedPct}
         />
         <View style={styles.divider} />
         <StatRow
@@ -185,6 +189,15 @@ export default function DashboardScreen() {
           <Text style={styles.messageBody}>{message.body}</Text>
         </View>
       )}
+
+      {/* capsule count */}
+      <Card style={{ marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <View>
+          <Eyebrow style={{ marginBottom: 4 }}>{s.timeCapsules}</Eyebrow>
+          <MonoText style={{ fontSize: 9 }}>{s.lettersToSelf}</MonoText>
+        </View>
+        <Text style={styles.bigCount}>{user.capsules?.length ?? 0}</Text>
+      </Card>
 
       {/* links */}
       <TouchableOpacity
@@ -220,6 +233,7 @@ const styles = StyleSheet.create({
   countdown: { fontFamily: fonts.mono, fontSize: 26, letterSpacing: 2, color: theme.accent },
 
   ageNumber: { fontFamily: fonts.serif, fontSize: 40, lineHeight: 42, color: theme.fg },
+  bigCount: { fontFamily: fonts.serif, fontSize: 36, color: theme.fg },
   sideNumber: { fontFamily: fonts.serif, fontSize: 22, color: theme.fg },
 
   statsCard: {

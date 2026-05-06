@@ -384,7 +384,7 @@ const styles = StyleSheet.create({
   optionLetter: { fontFamily: fonts.mono, fontSize: 10, color: theme.muted, letterSpacing: 2 },
   footer: { textAlign: 'center', marginBottom: 24, fontSize: 10 },
 
-  bigAge: { fontFamily: fonts.serif, fontSize: 72, lineHeight: 72, color: theme.accent, letterSpacing: -2, marginTop: 8 },
+  bigAge: { fontFamily: fonts.serif, fontSize: 72, lineHeight: 82, color: theme.accent, letterSpacing: -2, marginTop: 8 },
   confTrack: { width: '60%', height: 2, backgroundColor: theme.border, borderRadius: 2, overflow: 'hidden', marginTop: 10 },
   confFill: { height: '100%', backgroundColor: theme.accent },
   statRow: { flexDirection: 'row', gap: 8, marginBottom: 10 },
