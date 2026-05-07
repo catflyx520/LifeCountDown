@@ -125,9 +125,20 @@ export default function DashboardScreen() {
       </View>
 
       {/* greeting */}
-      <SerifText size={22} style={{ marginBottom: 16, lineHeight: 28 }}>
-        {greeting}
-      </SerifText>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
+        <SerifText size={22} style={{ lineHeight: 28, flex: 1 }}>
+          {greeting}
+        </SerifText>
+        {todayEntry && (
+          <TouchableOpacity
+            onPress={() => navigation.navigate('CheckIn' as any)}
+            style={styles.checkInBadge}
+            activeOpacity={0.75}
+          >
+            <Text style={styles.checkInBadgeText}>✓</Text>
+          </TouchableOpacity>
+        )}
+      </View>
 
       {/* hourglass + countdown */}
       <View style={styles.heroSection}>
@@ -138,29 +149,27 @@ export default function DashboardScreen() {
         </View>
       </View>
 
-      {/* check-in card */}
-      <TouchableOpacity
-        onPress={() => navigation.navigate('CheckIn' as any)}
-        style={[styles.checkInCard, todayEntry && styles.checkInCardDone]}
-        activeOpacity={0.85}
-      >
-        <View style={[styles.checkInIcon, todayEntry && styles.checkInIconDone]}>
-          <Text style={styles.checkInIconText}>
-            {todayMood ? todayMood.emoji : '✓'}
-          </Text>
-        </View>
-        <View style={{ flex: 1 }}>
-          <MonoText style={{ ...styles.checkInMeta, ...(todayEntry ? { color: theme.accentFg, opacity: 0.75 } : {}) }}>
-            {lang === 'zh' ? '今天' : 'Today'}{streak > 0 ? ` · ${s.streakLabel(streak)}` : ''}
-          </MonoText>
-          <Text style={[styles.checkInTitle, todayEntry ? { color: theme.accentFg } : {}]}>
-            {todayEntry
-              ? (lang === 'zh' ? '已打卡。点击编辑。' : 'Checked in. Tap to edit.')
-              : (lang === 'zh' ? '我今天还活着 →' : "I'm alive today →")}
-          </Text>
-        </View>
-        <MonoText style={{ ...styles.checkInArrow, ...(todayEntry ? { color: theme.accentFg } : {}) }}>→</MonoText>
-      </TouchableOpacity>
+      {/* check-in card — only shown when not yet checked in */}
+      {!todayEntry && (
+        <TouchableOpacity
+          onPress={() => navigation.navigate('CheckIn' as any)}
+          style={styles.checkInCard}
+          activeOpacity={0.85}
+        >
+          <View style={styles.checkInIcon}>
+            <Text style={styles.checkInIconText}>✓</Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            <MonoText style={styles.checkInMeta}>
+              {lang === 'zh' ? '打卡' : 'Check-in'}{streak > 0 ? ` · ${s.streakLabel(streak)}` : ''}
+            </MonoText>
+            <Text style={styles.checkInTitle}>
+              {lang === 'zh' ? '我今天还活着 →' : "I'm alive today →"}
+            </Text>
+          </View>
+          <MonoText style={styles.checkInArrow}>→</MonoText>
+        </TouchableOpacity>
+      )}
 
       {/* age card */}
       <Card style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
@@ -272,17 +281,22 @@ const styles = StyleSheet.create({
   ageNumber: { fontFamily: fonts.serif, fontSize: 40, lineHeight: 42, color: theme.fg },
   bigCount: { fontFamily: fonts.serif, fontSize: 36, color: theme.fg },
 
+  checkInBadge: {
+    width: 32, height: 32, borderRadius: 16,
+    backgroundColor: theme.accent, alignItems: 'center', justifyContent: 'center',
+    marginLeft: 10,
+  },
+  checkInBadgeText: { fontFamily: fonts.mono, fontSize: 14, color: theme.accentFg },
+
   checkInCard: {
     flexDirection: 'row', alignItems: 'center', gap: 14,
     padding: 16, borderRadius: 14, marginBottom: 10,
     backgroundColor: theme.surface, borderWidth: 1, borderColor: theme.border,
   },
-  checkInCardDone: { backgroundColor: theme.accent, borderColor: theme.accent },
   checkInIcon: {
     width: 44, height: 44, borderRadius: 12,
     backgroundColor: theme.bg, alignItems: 'center', justifyContent: 'center',
   },
-  checkInIconDone: { backgroundColor: 'rgba(245,236,214,0.18)' },
   checkInIconText: { fontSize: 24 },
   checkInMeta: { fontSize: 9, letterSpacing: 1.8, marginBottom: 4 },
   checkInTitle: { fontFamily: fonts.serif, fontSize: 19, lineHeight: 23, color: theme.fg },
