@@ -1,6 +1,6 @@
 # Development Context
 
-> Claude reads this automatically at session start. Last updated: 2026-05-05.
+> Claude reads this automatically at session start. Last updated: 2026-05-04.
 
 ## Project
 
@@ -9,7 +9,7 @@
 ## What's done
 
 - Complete onboarding flow: Age → Mode → Manual or AI Quiz → Result → Main
-- All 5 tabs: Dashboard, Figures, Capsule, Community, Settings
+- All 5 tabs: Dashboard, Check-in, Capsule, Community, Settings
 - AnimatedHourglass SVG component
 - AI integration via Gemini (`gemini-2.5-flash`) in QuizScreen
 - Full i18n (zh/en) via `useT()` — all screens fully translated including onboarding quotes, Dashboard quotes, Capsule unlock options, Community cohort/streaks
@@ -95,29 +95,34 @@ All large serif numbers had `fontSize === lineHeight` which clipped the top. Fix
 - `ManualScreen` bigAge: `lineHeight: 82` (fontSize 72)
 - `QuizScreen` bigAge: `lineHeight: 82` (fontSize 72)
 
-## EAS / Google Play publish setup (in progress)
+## EAS / Google Play publish setup (ON HOLD — resume after check-in feature)
 
 - EAS CLI installed, logged in
 - `eas.json` created (production profile, `app-bundle`)
 - EAS Secrets uploaded: all 8 `EXPO_PUBLIC_*` env vars
-- Google Play Developer account: registration in progress (payment pending)
-- Next step: run `eas build --platform android --profile production` once Play account is ready
-- Then: upload AAB to Google Play Console → Internal testing track
+- Google Play Developer account: ✅ approved
+- AAB build: triggered via `eas build --platform android --profile production` (may be ready)
+- Play Console app created: "Life Counter", store listing partially filled
+- **Remaining**: upload AAB → Internal testing track, add screenshots, finish store listing
+
+## Check-in feature (COMPLETE)
+
+Full check-in system shipped:
+
+- **`src/types.ts`** — `CheckIn` interface + `checkins: CheckIn[]` on `UserData`; `MainTabParamList` replaced `Figures` with `CheckIn`
+- **`src/storage.ts`** — `checkins: []` in `defaultUser`
+- **`src/screens/CheckInScreen.tsx`** — monthly calendar (mood emoji per cell), mood picker (5 emoji), 5-star rating, intention textarea (200 char), streak counter, save/update/saved states, all dates editable
+- **`src/screens/CommunityScreen.tsx`** — Quotes/Figures tab switcher; Figures content (Firestore query, ratio bars, bilingual) moved in from former FiguresScreen
+- **`src/navigation/index.tsx`** — `CheckIn` tab replaces `Figures`; `TabIcon` map updated
+- **`src/screens/DashboardScreen.tsx`**:
+  - Check-in card (not-yet state only): shows below hourglass when not yet checked in today
+  - After check-in: card hidden; accent ✓ badge appears to the right of greeting (taps to CheckIn screen)
+  - "Days left in month" stat replaces "Today used"
+  - Time Capsules card moved from Settings (identical layout)
 
 ## What to do next
 
-1. **Check-in feature** (designed, not yet built) — new tab replacing Figures:
-   - Monthly calendar view (mark checked-in days)
-   - Daily form: mood selection + satisfaction rating (1–5) + intention text input
-   - Data stored as `checkins: CheckIn[]` on `UserData`
-   - `CheckIn = { date: string, mood: string, rating: number, intention: string }`
-   - Dashboard gets a "Check in →" button linking to the tab
-
-2. **Community screen refactor** — add Quotes/Figures tab switcher:
-   - Top tabs: Quotes | Figures
-   - Figures content moved from FiguresScreen into Community
-   - Figures tab removed from bottom navigation
-
-3. Community STREAKS and cohort values — replace with real data once Firebase Auth exists
-4. Decide on Firebase Auth (real user accounts) vs staying anonymous
-5. `@anthropic-ai/sdk` in dependencies, not yet wired up
+1. Community STREAKS and cohort values — replace with real data once Firebase Auth exists
+2. Decide on Firebase Auth (real user accounts) vs staying anonymous
+3. `@anthropic-ai/sdk` in dependencies, not yet wired up
+4. **Google Play publish** (ON HOLD): upload AAB → Internal Testing track, screenshots, finish store listing
