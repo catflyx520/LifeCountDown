@@ -7,7 +7,7 @@ import { Eyebrow, SerifText, Card, MonoText } from '../components/UI';
 import AnimatedHourglass from '../components/AnimatedHourglass';
 import { useCountdown } from '../hooks/useCountdown';
 import { loadUser, ageFromBirthdate, daysUntilBirthday, getDailyQuoteIndex } from '../storage';
-import { UserData } from '../types';
+import { UserData, CheckIn } from '../types';
 import { useT, rawDashQuotes } from '../i18n';
 import { buildDailyMessage } from '../utils/dailyMessage';
 
@@ -90,6 +90,19 @@ export default function DashboardScreen() {
   const nextBday = user.birthdate ? daysUntilBirthday(user.birthdate) : null;
 
   const today = now.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' });
+  const todayISO = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const checkins = user.checkins ?? [];
+  const todayEntry = checkins.find((c: CheckIn) => c.date === todayISO);
+  const todayMood = todayEntry ? s.moods.find(m => m.key === todayEntry.mood) : null;
+
+  // streak
+  let streak = 0;
+  const checkedDates = new Set(checkins.map((c: CheckIn) => c.date));
+  const sd = new Date(now);
+  for (;;) {
+    const iso = `${sd.getFullYear()}-${String(sd.getMonth() + 1).padStart(2, '0')}-${String(sd.getDate()).padStart(2, '0')}`;
+    if (checkedDates.has(iso)) { streak++; sd.setDate(sd.getDate() - 1); } else break;
+  }
 
   const greeting = user.name
     ? s.goodToSeeNamed(user.name).replace('\n', ' ')
@@ -124,6 +137,30 @@ export default function DashboardScreen() {
           <Text style={styles.countdown}>{countdown}</Text>
         </View>
       </View>
+
+      {/* check-in card */}
+      <TouchableOpacity
+        onPress={() => navigation.navigate('CheckIn' as any)}
+        style={[styles.checkInCard, todayEntry && styles.checkInCardDone]}
+        activeOpacity={0.85}
+      >
+        <View style={[styles.checkInIcon, todayEntry && styles.checkInIconDone]}>
+          <Text style={styles.checkInIconText}>
+            {todayMood ? todayMood.emoji : '✓'}
+          </Text>
+        </View>
+        <View style={{ flex: 1 }}>
+          <MonoText style={{ ...styles.checkInMeta, ...(todayEntry ? { color: theme.accentFg, opacity: 0.75 } : {}) }}>
+            {lang === 'zh' ? '今天' : 'Today'}{streak > 0 ? ` · ${s.streakLabel(streak)}` : ''}
+          </MonoText>
+          <Text style={[styles.checkInTitle, todayEntry ? { color: theme.accentFg } : {}]}>
+            {todayEntry
+              ? (lang === 'zh' ? '已打卡。点击编辑。' : 'Checked in. Tap to edit.')
+              : (lang === 'zh' ? '我今天还活着 →' : "I'm alive today →")}
+          </Text>
+        </View>
+        <MonoText style={{ ...styles.checkInArrow, ...(todayEntry ? { color: theme.accentFg } : {}) }}>→</MonoText>
+      </TouchableOpacity>
 
       {/* age card */}
       <Card style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
@@ -201,15 +238,8 @@ export default function DashboardScreen() {
 
       {/* links */}
       <TouchableOpacity
-        onPress={() => navigation.navigate('CheckIn' as any)}
-        style={styles.link}
-      >
-        <Eyebrow style={{ color: theme.accent }}>{s.checkInLink}</Eyebrow>
-      </TouchableOpacity>
-
-      <TouchableOpacity
         onPress={() => navigation.navigate('Hourglass')}
-        style={[styles.link, { marginTop: 8 }]}
+        style={styles.link}
       >
         <Eyebrow style={{ color: theme.accent }}>{s.viewHourglass}</Eyebrow>
       </TouchableOpacity>
@@ -241,6 +271,22 @@ const styles = StyleSheet.create({
 
   ageNumber: { fontFamily: fonts.serif, fontSize: 40, lineHeight: 42, color: theme.fg },
   bigCount: { fontFamily: fonts.serif, fontSize: 36, color: theme.fg },
+
+  checkInCard: {
+    flexDirection: 'row', alignItems: 'center', gap: 14,
+    padding: 16, borderRadius: 14, marginBottom: 10,
+    backgroundColor: theme.surface, borderWidth: 1, borderColor: theme.border,
+  },
+  checkInCardDone: { backgroundColor: theme.accent, borderColor: theme.accent },
+  checkInIcon: {
+    width: 44, height: 44, borderRadius: 12,
+    backgroundColor: theme.bg, alignItems: 'center', justifyContent: 'center',
+  },
+  checkInIconDone: { backgroundColor: 'rgba(245,236,214,0.18)' },
+  checkInIconText: { fontSize: 24 },
+  checkInMeta: { fontSize: 9, letterSpacing: 1.8, marginBottom: 4 },
+  checkInTitle: { fontFamily: fonts.serif, fontSize: 19, lineHeight: 23, color: theme.fg },
+  checkInArrow: { fontSize: 14, color: theme.muted },
   sideNumber: { fontFamily: fonts.serif, fontSize: 22, color: theme.fg },
 
   statsCard: {
