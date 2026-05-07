@@ -29,7 +29,7 @@ function calcStreak(checkins: CheckIn[]): number {
 
 export default function CheckInScreen() {
   const insets = useSafeAreaInsets();
-  const { s } = useT();
+  const { s, lang } = useT();
 
   const now = new Date();
   const todayStr = toDateStr(now);
@@ -94,6 +94,12 @@ export default function CheckInScreen() {
   const isSaved = justSaved || (existing && JSON.stringify(existing) === JSON.stringify({ ...draft, date: selectedDate }));
   const btnLabel = isSaved ? s.savedCheckIn : existing ? s.updateCheckIn : s.saveCheckIn;
 
+  // 可编辑范围：今天 + 前 6 天
+  const minEditDate = new Date(now);
+  minEditDate.setDate(minEditDate.getDate() - 6);
+  const minEditISO = toDateStr(minEditDate);
+  const isEditable = (iso: string) => iso >= minEditISO && iso <= todayStr;
+
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: theme.bg }}
@@ -143,23 +149,27 @@ export default function CheckInScreen() {
               const mood = entry ? s.moods.find(m => m.key === entry.mood) : null;
               const isSel = iso === selectedDate;
               const isTod = iso === todayStr;
+              const canEdit = isEditable(iso);
               return (
                 <TouchableOpacity
                   key={dow}
                   style={styles.dayCell}
-                  onPress={() => selectDate(iso)}
+                  onPress={() => canEdit && selectDate(iso)}
+                  activeOpacity={canEdit ? 0.7 : 1}
                 >
                   <View style={[
                     styles.dayCellInner,
                     isSel && styles.dayCellSelected,
+                    !canEdit && styles.dayCellDisabled,
                   ]}>
                     <Text style={[
                       styles.dayNum,
                       isTod && { color: theme.accent, fontWeight: '600' },
+                      !canEdit && { color: theme.border },
                     ]}>
                       {day}
                     </Text>
-                    <Text style={styles.dayEmoji}>{mood ? mood.emoji : ''}</Text>
+                    <Text style={[styles.dayEmoji, !canEdit && { opacity: 0.3 }]}>{mood ? mood.emoji : ''}</Text>
                   </View>
                 </TouchableOpacity>
               );
@@ -181,58 +191,66 @@ export default function CheckInScreen() {
           )}
         </View>
 
-        {/* Mood */}
-        <Eyebrow style={{ marginBottom: 8, fontSize: 9 }}>{s.moodLabel}</Eyebrow>
-        <View style={styles.moodRow}>
-          {s.moods.map(m => (
-            <TouchableOpacity
-              key={m.key}
-              onPress={() => { setDraft(d => ({ ...d, mood: m.key })); setJustSaved(false); }}
-              style={[styles.moodBtn, draft.mood === m.key && styles.moodBtnActive]}
-            >
-              <Text style={styles.moodEmoji}>{m.emoji}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Rating */}
-        <Eyebrow style={{ marginTop: 16, marginBottom: 8, fontSize: 9 }}>{s.ratingLabel}</Eyebrow>
-        <View style={styles.starsRow}>
-          {[1, 2, 3, 4, 5].map(n => (
-            <TouchableOpacity
-              key={n}
-              onPress={() => { setDraft(d => ({ ...d, rating: n })); setJustSaved(false); }}
-              style={styles.starBtn}
-            >
-              <Text style={[styles.star, n <= draft.rating && styles.starActive]}>★</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Intention */}
-        <Eyebrow style={{ marginTop: 16, marginBottom: 8, fontSize: 9 }}>{s.intentionLabel}</Eyebrow>
-        <TextInput
-          value={draft.intention}
-          onChangeText={text => { setDraft(d => ({ ...d, intention: text.slice(0, 200) })); setJustSaved(false); }}
-          placeholder={s.intentionPlaceholder}
-          placeholderTextColor={theme.muted}
-          style={styles.intentionInput}
-          multiline
-        />
-        <MonoText style={{ fontSize: 9, color: theme.muted, textAlign: 'right', marginTop: 4 }}>
-          {draft.intention.length}/200
-        </MonoText>
-
-        {/* Save button */}
-        <TouchableOpacity
-          onPress={handleSave}
-          style={[styles.saveBtn, !draft.mood && { opacity: 0.4 }]}
-          disabled={!draft.mood}
-        >
-          <MonoText style={{ fontSize: 10, color: theme.accentFg, letterSpacing: 1.5 }}>
-            {btnLabel}
+        {!isEditable(selectedDate) ? (
+          <MonoText style={{ fontSize: 11, color: theme.muted, textAlign: 'center', paddingVertical: 20 }}>
+            {lang === 'zh' ? '仅可修改最近 7 天的记录' : 'Only the last 7 days can be edited'}
           </MonoText>
-        </TouchableOpacity>
+        ) : (
+          <>
+            {/* Mood */}
+            <Eyebrow style={{ marginBottom: 8, fontSize: 9 }}>{s.moodLabel}</Eyebrow>
+            <View style={styles.moodRow}>
+              {s.moods.map(m => (
+                <TouchableOpacity
+                  key={m.key}
+                  onPress={() => { setDraft(d => ({ ...d, mood: m.key })); setJustSaved(false); }}
+                  style={[styles.moodBtn, draft.mood === m.key && styles.moodBtnActive]}
+                >
+                  <Text style={styles.moodEmoji}>{m.emoji}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* Rating */}
+            <Eyebrow style={{ marginTop: 16, marginBottom: 8, fontSize: 9 }}>{s.ratingLabel}</Eyebrow>
+            <View style={styles.starsRow}>
+              {[1, 2, 3, 4, 5].map(n => (
+                <TouchableOpacity
+                  key={n}
+                  onPress={() => { setDraft(d => ({ ...d, rating: n })); setJustSaved(false); }}
+                  style={styles.starBtn}
+                >
+                  <Text style={[styles.star, n <= draft.rating && styles.starActive]}>★</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* Intention */}
+            <Eyebrow style={{ marginTop: 16, marginBottom: 8, fontSize: 9 }}>{s.intentionLabel}</Eyebrow>
+            <TextInput
+              value={draft.intention}
+              onChangeText={text => { setDraft(d => ({ ...d, intention: text.slice(0, 200) })); setJustSaved(false); }}
+              placeholder={s.intentionPlaceholder}
+              placeholderTextColor={theme.muted}
+              style={styles.intentionInput}
+              multiline
+            />
+            <MonoText style={{ fontSize: 9, color: theme.muted, textAlign: 'right', marginTop: 4 }}>
+              {draft.intention.length}/200
+            </MonoText>
+
+            {/* Save button */}
+            <TouchableOpacity
+              onPress={handleSave}
+              style={[styles.saveBtn, !draft.mood && { opacity: 0.4 }]}
+              disabled={!draft.mood}
+            >
+              <MonoText style={{ fontSize: 10, color: theme.accentFg, letterSpacing: 1.5 }}>
+                {btnLabel}
+              </MonoText>
+            </TouchableOpacity>
+          </>
+        )}
       </Card>
     </ScrollView>
   );
@@ -259,6 +277,7 @@ const styles = StyleSheet.create({
   dayCellSelected: {
     borderColor: theme.accent, backgroundColor: 'rgba(181,83,60,0.08)',
   },
+  dayCellDisabled: { opacity: 0.35 },
   dayNum: { fontFamily: fonts.mono, fontSize: 10, color: theme.fg },
   dayEmoji: { fontSize: 11, lineHeight: 13 },
 
