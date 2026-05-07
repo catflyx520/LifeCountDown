@@ -160,7 +160,8 @@ const en = {
   capsuleSubtitle: 'Write a letter to your future self.',
   newLetter: 'New letter',
   dearFutureMe: 'Dear future me,',
-  opensIn: (days: number) => `Opens in ${days} days`,
+  opensIn: (days: number) => days === 0 ? 'Opens today' : `Opens in ${days} days`,
+  customDays: 'Custom days',
   tapToRead: 'tap to read',
   sealAway: 'Seal it away →',
   yourLetters: 'Your letters',
@@ -168,6 +169,8 @@ const en = {
   locked: 'Locked',
   unlockIn: 'Unlocks in',
   unlockedOn: 'Unlocked',
+  capsuleWrittenHere: 'You wrote a letter on this day',
+  capsuleUnlockHere: 'A letter unlocks on this day',
   writtenOn: 'Written',
 
   // Community
@@ -399,7 +402,8 @@ const zh: typeof en = {
   capsuleSubtitle: '写一封信给未来的自己。',
   newLetter: '新信件',
   dearFutureMe: '亲爱的未来的我，',
-  opensIn: (days) => `${days} 天后开启`,
+  opensIn: (days: number) => days === 0 ? '今天开启' : `${days} 天后开启`,
+  customDays: '自定义天数',
   tapToRead: '点击阅读',
   sealAway: '封存 →',
   yourLetters: '你的信件',
@@ -407,6 +411,8 @@ const zh: typeof en = {
   locked: '已封存',
   unlockIn: '解锁于',
   unlockedOn: '已解锁',
+  capsuleWrittenHere: '你在这天写了一封信',
+  capsuleUnlockHere: '这天有一封信将解锁',
   writtenOn: '写于',
 
   communityTitle: '社区 · 匿名',

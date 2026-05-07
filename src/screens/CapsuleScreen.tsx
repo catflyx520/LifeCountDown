@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet,
+  View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
@@ -13,10 +13,11 @@ import { useT } from '../i18n';
 
 export default function CapsuleScreen() {
   const insets = useSafeAreaInsets();
-  const { s } = useT();
+  const { s, lang } = useT();
   const [capsules, setCapsules] = useState<Capsule[]>([]);
   const [draft, setDraft] = useState('');
   const [unlockDays, setUnlockDays] = useState(365);
+  const [customInput, setCustomInput] = useState('');
 
   const reload = useCallback(() => {
     loadUser().then(u => setCapsules(u.capsules ?? []));
@@ -69,14 +70,31 @@ export default function CapsuleScreen() {
           {s.unlockOptions.map(o => (
             <TouchableOpacity
               key={o.days}
-              onPress={() => setUnlockDays(o.days)}
-              style={[styles.unlockBtn, unlockDays === o.days && styles.unlockBtnActive]}
+              onPress={() => { setUnlockDays(o.days); setCustomInput(''); }}
+              style={[styles.unlockBtn, unlockDays === o.days && !customInput && styles.unlockBtnActive]}
             >
-              <Text style={[styles.unlockBtnText, unlockDays === o.days && { color: theme.accentFg }]}>
+              <Text style={[styles.unlockBtnText, unlockDays === o.days && !customInput && { color: theme.accentFg }]}>
                 {o.label}
               </Text>
             </TouchableOpacity>
           ))}
+        </View>
+        {/* 自定义天数 */}
+        <View style={styles.customRow}>
+          <MonoText style={{ fontSize: 9, color: theme.muted }}>{s.customDays}</MonoText>
+          <TextInput
+            value={customInput}
+            onChangeText={v => {
+              const n = v.replace(/[^0-9]/g, '');
+              setCustomInput(n);
+              if (n !== '') setUnlockDays(parseInt(n, 10) || 0);
+            }}
+            placeholder="0"
+            placeholderTextColor={theme.muted}
+            keyboardType="number-pad"
+            style={[styles.customInput, customInput !== '' && styles.customInputActive]}
+          />
+          <MonoText style={{ fontSize: 9, color: theme.muted }}>{lang === 'zh' ? '天' : 'days'}</MonoText>
         </View>
 
         <View style={styles.sealRow}>
@@ -135,7 +153,14 @@ const styles = StyleSheet.create({
     color: theme.fg, minHeight: 80,
     marginBottom: 12,
   },
-  unlockRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 12 },
+  unlockRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 },
+  customRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
+  customInput: {
+    fontFamily: fonts.mono, fontSize: 13, color: theme.fg,
+    borderWidth: 1, borderColor: theme.border, borderRadius: 8,
+    paddingHorizontal: 10, paddingVertical: 5, minWidth: 60, textAlign: 'center',
+  },
+  customInputActive: { borderColor: theme.accent },
   unlockBtn: {
     paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8,
     borderWidth: 1, borderColor: theme.border,

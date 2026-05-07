@@ -220,6 +220,57 @@ export default function CheckInScreen() {
           )}
         </View>
 
+        {/* 胶囊信息：写信日 or 解锁日 */}
+        {(() => {
+          const created = capsules.filter(c => isoToDate(c.createdAt) === selectedDate);
+          const unlocking = capsules.filter(c => isoToDate(c.unlockAt) === selectedDate);
+          if (!created.length && !unlocking.length) return null;
+          return (
+            <View style={{ gap: 8, marginBottom: 14 }}>
+              {created.map(c => {
+                const daysLeft = Math.max(0, Math.ceil((new Date(c.unlockAt).getTime() - Date.now()) / 86400000));
+                const unlocked = Date.now() >= new Date(c.unlockAt).getTime();
+                return (
+                  <View key={c.id} style={styles.capsuleInfoCard}>
+                    <Text style={styles.capsuleInfoIcon}>◉</Text>
+                    <View style={{ flex: 1 }}>
+                      <MonoText style={styles.capsuleInfoMeta}>{zh ? '写信日' : 'WRITTEN HERE'}</MonoText>
+                      <Text style={styles.capsuleInfoBody}>
+                        {unlocked
+                          ? (zh ? '这封信已解锁' : 'This letter is now open')
+                          : (zh ? `解锁日 ${isoToDate(c.unlockAt)} · 还有 ${daysLeft} 天` : `Unlocks ${isoToDate(c.unlockAt)} · ${daysLeft} days left`)}
+                      </Text>
+                      <Text style={styles.capsuleInfoPreview} numberOfLines={2}>
+                        {unlocked ? `"${c.text}"` : '••••••••••••••••'}
+                      </Text>
+                    </View>
+                  </View>
+                );
+              })}
+              {unlocking.map(c => {
+                const unlocked = Date.now() >= new Date(c.unlockAt).getTime();
+                const createdDate = isoToDate(c.createdAt);
+                return (
+                  <View key={c.id} style={[styles.capsuleInfoCard, unlocked && styles.capsuleInfoCardUnlocked]}>
+                    <Text style={styles.capsuleInfoIcon}>◎</Text>
+                    <View style={{ flex: 1 }}>
+                      <MonoText style={{ ...styles.capsuleInfoMeta, ...(unlocked ? { color: theme.accent } : {}) }}>
+                        {zh ? (unlocked ? '已解锁' : '解锁日') : (unlocked ? 'UNLOCKED' : 'UNLOCK DAY')}
+                      </MonoText>
+                      <Text style={styles.capsuleInfoBody}>
+                        {zh ? `写于 ${createdDate}` : `Written ${createdDate}`}
+                      </Text>
+                      <Text style={styles.capsuleInfoPreview} numberOfLines={unlocked ? 4 : 2}>
+                        {unlocked ? `"${c.text}"` : '••••••••••••••••'}
+                      </Text>
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          );
+        })()}
+
         {selectedIsLocked ? (
           <View>
             {/* 锁定说明 */}
@@ -385,6 +436,16 @@ const styles = StyleSheet.create({
   formHeader: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14,
   },
+
+  capsuleInfoCard: {
+    flexDirection: 'row', gap: 10, padding: 12, borderRadius: 10,
+    backgroundColor: theme.bg, borderWidth: 1, borderColor: theme.border,
+  },
+  capsuleInfoCardUnlocked: { borderColor: theme.accent },
+  capsuleInfoIcon: { fontSize: 18, color: theme.accent, marginTop: 1 },
+  capsuleInfoMeta: { fontSize: 9, letterSpacing: 1.5, color: theme.muted, marginBottom: 3 },
+  capsuleInfoBody: { fontFamily: fonts.body, fontSize: 12, color: theme.muted, marginBottom: 4 },
+  capsuleInfoPreview: { fontFamily: fonts.serifItalic, fontSize: 13, color: theme.fg, lineHeight: 18 },
 
   lockedBanner: {
     flexDirection: 'row', gap: 12, alignItems: 'flex-start',
