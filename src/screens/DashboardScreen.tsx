@@ -201,8 +201,15 @@ export default function DashboardScreen() {
 
       {/* links */}
       <TouchableOpacity
-        onPress={() => navigation.navigate('Hourglass')}
+        onPress={() => navigation.navigate('CheckIn' as any)}
         style={styles.link}
+      >
+        <Eyebrow style={{ color: theme.accent }}>{s.checkInLink}</Eyebrow>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        onPress={() => navigation.navigate('Hourglass')}
+        style={[styles.link, { marginTop: 8 }]}
       >
         <Eyebrow style={{ color: theme.accent }}>{s.viewHourglass}</Eyebrow>
       </TouchableOpacity>

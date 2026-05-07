@@ -226,10 +226,35 @@ const en = {
 
   // Nav tabs
   tabDashboard: 'Home',
-  tabFigures: 'Figures',
+  tabCheckIn: 'Check In',
   tabCapsule: 'Capsule',
   tabCommunity: 'Community',
   tabSettings: 'Settings',
+
+  // Check-in
+  checkInTitle: 'Check-in',
+  streakLabel: (n: number) => `${n} day streak`,
+  moods: [
+    { key: 'calm',    emoji: '😌' },
+    { key: 'happy',   emoji: '😊' },
+    { key: 'neutral', emoji: '😐' },
+    { key: 'anxious', emoji: '😟' },
+    { key: 'drained', emoji: '😩' },
+  ],
+  moodLabel: 'How do you feel?',
+  ratingLabel: 'Day rating',
+  intentionLabel: 'One thing today',
+  intentionPlaceholder: 'What matters most today?',
+  saveCheckIn: 'Save check-in',
+  updateCheckIn: 'Update entry',
+  savedCheckIn: 'Saved ✓',
+  loggedBadge: 'Logged',
+  todayCheckInTitle: "Today's check-in",
+  checkInLink: 'Check In →',
+
+  // Community tabs
+  tabQuotes: 'Quotes',
+  tabFigures: 'Figures',
 };
 
 const zh: typeof en = {
@@ -437,10 +462,33 @@ const zh: typeof en = {
   notifTest: '发送测试通知 →',
 
   tabDashboard: '主页',
-  tabFigures: '人物',
+  tabCheckIn: '打卡',
   tabCapsule: '胶囊',
   tabCommunity: '社区',
   tabSettings: '设置',
+
+  checkInTitle: '每日打卡',
+  streakLabel: (n: number) => `连续 ${n} 天`,
+  moods: [
+    { key: 'calm',    emoji: '😌' },
+    { key: 'happy',   emoji: '😊' },
+    { key: 'neutral', emoji: '😐' },
+    { key: 'anxious', emoji: '😟' },
+    { key: 'drained', emoji: '😩' },
+  ],
+  moodLabel: '现在感觉如何？',
+  ratingLabel: '今日评分',
+  intentionLabel: '今天最重要的一件事',
+  intentionPlaceholder: '今天最想做什么？',
+  saveCheckIn: '保存打卡',
+  updateCheckIn: '更新记录',
+  savedCheckIn: '已保存 ✓',
+  loggedBadge: '已打卡',
+  todayCheckInTitle: '今日打卡',
+  checkInLink: '打卡 →',
+
+  tabQuotes: '名言',
+  tabFigures: '人物',
 };
 
 export type Strings = typeof en;

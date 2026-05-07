@@ -12,6 +12,7 @@ export const defaultUser: UserData = {
   confidence: 90,
   name: '',
   capsules: [],
+  checkins: [],
   createdAt: new Date().toISOString(),
   notificationsEnabled: false,
   notifyHour: 9,

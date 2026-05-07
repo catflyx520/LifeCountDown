@@ -8,6 +8,13 @@ export interface Capsule {
   unlockDays: number;
 }
 
+export interface CheckIn {
+  date: string;       // 'YYYY-MM-DD'
+  mood: string;       // 'calm' | 'happy' | 'neutral' | 'anxious' | 'drained'
+  rating: number;     // 1–5
+  intention: string;
+}
+
 export interface UserData {
   age: number;
   birthdate: string | null;   // 'YYYY-MM-DD' or null
@@ -17,6 +24,7 @@ export interface UserData {
   confidence: number;
   name: string;
   capsules: Capsule[];
+  checkins: CheckIn[];
   createdAt: string;          // ISO date string
   notificationsEnabled: boolean;
   notifyHour: number;
@@ -35,7 +43,7 @@ export type RootStackParamList = {
 
 export type MainTabParamList = {
   Dashboard: undefined;
-  Figures: undefined;
+  CheckIn: undefined;
   Capsule: undefined;
   Community: undefined;
   Settings: undefined;
