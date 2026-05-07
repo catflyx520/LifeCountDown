@@ -3,15 +3,20 @@ import {
   View, Text, ScrollView, TouchableOpacity, TextInput, StyleSheet,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Eyebrow, Card, MonoText } from '../components/UI';
 import { theme, fonts } from '../theme';
 import { loadUser, saveUser } from '../storage';
-import { CheckIn } from '../types';
+import { CheckIn, Capsule } from '../types';
 import { useT } from '../i18n';
 
 function toDateStr(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function isoToDate(iso: string): string {
+  // handles both '2026-05-07' and full ISO timestamps
+  return iso.slice(0, 10);
 }
 
 function calcStreak(checkins: CheckIn[]): number {
@@ -30,11 +35,13 @@ function calcStreak(checkins: CheckIn[]): number {
 export default function CheckInScreen() {
   const insets = useSafeAreaInsets();
   const { s, lang } = useT();
+  const navigation = useNavigation<any>();
 
   const now = new Date();
   const todayStr = toDateStr(now);
 
   const [checkins, setCheckins] = useState<CheckIn[]>([]);
+  const [capsules, setCapsules] = useState<Capsule[]>([]);
   const [view, setView] = useState({ y: now.getFullYear(), m: now.getMonth() });
   const [selectedDate, setSelectedDate] = useState(todayStr);
   const [draft, setDraft] = useState<CheckIn>({ date: todayStr, mood: '', rating: 0, intention: '' });
@@ -46,6 +53,7 @@ export default function CheckInScreen() {
     loadUser().then(u => {
       const all = u.checkins ?? [];
       setCheckins(all);
+      setCapsules(u.capsules ?? []);
       const existing = all.find(c => c.date === todayStr);
       setDraft(existing ?? { date: todayStr, mood: '', rating: 0, intention: '' });
       setSelectedDate(todayStr);
@@ -54,7 +62,6 @@ export default function CheckInScreen() {
     setJustSaved(false);
   }, []));
 
-  // Update draft when selected date changes
   const selectDate = (iso: string) => {
     setSelectedDate(iso);
     const existing = entryFor(iso);
@@ -79,6 +86,16 @@ export default function CheckInScreen() {
     setView({ y, m });
   };
 
+  // 可编辑范围：今天 + 前 6 天
+  const minEditDate = new Date(now);
+  minEditDate.setDate(minEditDate.getDate() - 6);
+  const minEditISO = toDateStr(minEditDate);
+  const isEditable = (iso: string) => iso >= minEditISO && iso <= todayStr;
+
+  // 胶囊日期集合（创建日 & 解锁日）
+  const capsuleCreatedDates = new Set(capsules.map(c => isoToDate(c.createdAt)));
+  const capsuleUnlockDates = new Set(capsules.map(c => isoToDate(c.unlockAt)));
+
   // Calendar cells
   const daysInMonth = new Date(view.y, view.m + 1, 0).getDate();
   const firstDayOfWeek = new Date(view.y, view.m, 1).getDay();
@@ -94,11 +111,11 @@ export default function CheckInScreen() {
   const isSaved = justSaved || (existing && JSON.stringify(existing) === JSON.stringify({ ...draft, date: selectedDate }));
   const btnLabel = isSaved ? s.savedCheckIn : existing ? s.updateCheckIn : s.saveCheckIn;
 
-  // 可编辑范围：今天 + 前 6 天
-  const minEditDate = new Date(now);
-  minEditDate.setDate(minEditDate.getDate() - 6);
-  const minEditISO = toDateStr(minEditDate);
-  const isEditable = (iso: string) => iso >= minEditISO && iso <= todayStr;
+  const selectedIsFuture = selectedDate > todayStr;
+  const selectedIsPast = selectedDate < minEditISO;
+  const selectedIsLocked = !isEditable(selectedDate);
+
+  const zh = lang === 'zh';
 
   return (
     <ScrollView
@@ -119,7 +136,6 @@ export default function CheckInScreen() {
 
       {/* Calendar */}
       <Card style={{ marginBottom: 14 }}>
-        {/* Month navigation */}
         <View style={styles.monthNav}>
           <TouchableOpacity onPress={() => stepMonth(-1)} style={styles.monthArrow}>
             <MonoText style={{ fontSize: 18, color: theme.fg }}>‹</MonoText>
@@ -130,7 +146,6 @@ export default function CheckInScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Day-of-week headers */}
         <View style={styles.weekRow}>
           {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
             <View key={i} style={styles.weekCell}>
@@ -139,7 +154,6 @@ export default function CheckInScreen() {
           ))}
         </View>
 
-        {/* Day grid */}
         {Array.from({ length: cells.length / 7 }).map((_, week) => (
           <View key={week} style={styles.weekRow}>
             {cells.slice(week * 7, week * 7 + 7).map((day, dow) => {
@@ -149,33 +163,48 @@ export default function CheckInScreen() {
               const mood = entry ? s.moods.find(m => m.key === entry.mood) : null;
               const isSel = iso === selectedDate;
               const isTod = iso === todayStr;
-              const canEdit = isEditable(iso);
+              const hasCreated = capsuleCreatedDates.has(iso);
+              const hasUnlock = capsuleUnlockDates.has(iso);
               return (
                 <TouchableOpacity
                   key={dow}
                   style={styles.dayCell}
-                  onPress={() => canEdit && selectDate(iso)}
-                  activeOpacity={canEdit ? 0.7 : 1}
+                  onPress={() => selectDate(iso)}
+                  activeOpacity={0.7}
                 >
-                  <View style={[
-                    styles.dayCellInner,
-                    isSel && styles.dayCellSelected,
-                    !canEdit && styles.dayCellDisabled,
-                  ]}>
+                  <View style={[styles.dayCellInner, isSel && styles.dayCellSelected]}>
                     <Text style={[
                       styles.dayNum,
                       isTod && { color: theme.accent, fontWeight: '600' },
-                      !canEdit && { color: theme.border },
                     ]}>
                       {day}
                     </Text>
-                    <Text style={[styles.dayEmoji, !canEdit && { opacity: 0.3 }]}>{mood ? mood.emoji : ''}</Text>
+                    <Text style={styles.dayEmoji}>{mood ? mood.emoji : ''}</Text>
+                    {/* 胶囊指示点 */}
+                    {(hasCreated || hasUnlock) && (
+                      <View style={styles.capsuleDotRow}>
+                        {hasCreated && <View style={styles.capsuleDotCreated} />}
+                        {hasUnlock && <View style={styles.capsuleDotUnlock} />}
+                      </View>
+                    )}
                   </View>
                 </TouchableOpacity>
               );
             })}
           </View>
         ))}
+
+        {/* 图例 */}
+        <View style={styles.legend}>
+          <View style={styles.legendItem}>
+            <View style={styles.capsuleDotCreated} />
+            <MonoText style={styles.legendText}>{zh ? '写信日' : 'written'}</MonoText>
+          </View>
+          <View style={styles.legendItem}>
+            <View style={styles.capsuleDotUnlock} />
+            <MonoText style={styles.legendText}>{zh ? '解锁日' : 'unlock'}</MonoText>
+          </View>
+        </View>
       </Card>
 
       {/* Form */}
@@ -184,17 +213,82 @@ export default function CheckInScreen() {
           <Eyebrow>
             {selectedDate === todayStr ? s.todayCheckInTitle : selectedDate}
           </Eyebrow>
-          {existing && (
+          {existing && !selectedIsLocked && (
             <MonoText style={{ fontSize: 9, color: theme.accent, letterSpacing: 1.5 }}>
               {s.loggedBadge}
             </MonoText>
           )}
         </View>
 
-        {!isEditable(selectedDate) ? (
-          <MonoText style={{ fontSize: 11, color: theme.muted, textAlign: 'center', paddingVertical: 20 }}>
-            {lang === 'zh' ? '仅可修改最近 7 天的记录' : 'Only the last 7 days can be edited'}
-          </MonoText>
+        {selectedIsLocked ? (
+          <View>
+            {/* 锁定说明 */}
+            <View style={styles.lockedBanner}>
+              <Text style={styles.lockedIcon}>{selectedIsFuture ? '◌' : '◎'}</Text>
+              <View style={{ flex: 1 }}>
+                <MonoText style={styles.lockedTitle}>
+                  {selectedIsFuture
+                    ? (zh ? '未来尚未发生' : 'The future hasn\'t happened yet')
+                    : (zh ? '遥远的过去' : 'The distant past')}
+                </MonoText>
+                <Text style={styles.lockedBody}>
+                  {selectedIsFuture
+                    ? (zh
+                        ? '你无法预先打卡未来的日子，它还没有属于你的故事。'
+                        : "You can't check in for a day that hasn't arrived yet.")
+                    : (zh
+                        ? '你无法修改 7 天前的记录。那一天已成为历史，永远属于那时的你。'
+                        : 'Records older than 7 days are sealed. That day belongs to who you were then.')}
+                </Text>
+              </View>
+            </View>
+
+            {/* 只读展示已有打卡 */}
+            {existing && (
+              <View style={styles.readonlyEntry}>
+                <Text style={styles.readonlyMood}>
+                  {s.moods.find(m => m.key === existing.mood)?.emoji ?? ''}
+                </Text>
+                {existing.rating > 0 && (
+                  <Text style={styles.readonlyStars}>
+                    {'★'.repeat(existing.rating)}{'☆'.repeat(5 - existing.rating)}
+                  </Text>
+                )}
+                {existing.intention ? (
+                  <Text style={styles.readonlyIntention}>{existing.intention}</Text>
+                ) : null}
+              </View>
+            )}
+
+            {/* 胶囊引导 */}
+            <TouchableOpacity
+              style={styles.capsulePrompt}
+              onPress={() => navigation.navigate('Capsule')}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.capsulePromptIcon}>◉</Text>
+              <View style={{ flex: 1 }}>
+                <MonoText style={styles.capsulePromptMeta}>
+                  {zh ? '时光胶囊' : 'TIME CAPSULE'}
+                </MonoText>
+                <Text style={styles.capsulePromptTitle}>
+                  {selectedIsFuture
+                    ? (zh ? '给那天的自己提前留言' : 'Leave a message for that day')
+                    : (zh ? '给那时的自己写一封信' : 'Write a letter to who you were')}
+                </Text>
+                <Text style={styles.capsulePromptBody}>
+                  {selectedIsFuture
+                    ? (zh
+                        ? '今天写下想说的话，让未来的你来发现。封存记忆，等待开启。'
+                        : 'Write something today for your future self to discover.')
+                    : (zh
+                        ? '把回忆封存进时光胶囊，等未来的你再来翻开。'
+                        : 'Seal a memory in a capsule for your future self to open.')}
+                </Text>
+              </View>
+              <MonoText style={{ fontFamily: fonts.mono, fontSize: 14, color: theme.accent }}>→</MonoText>
+            </TouchableOpacity>
+          </View>
         ) : (
           <>
             {/* Mood */}
@@ -277,13 +371,48 @@ const styles = StyleSheet.create({
   dayCellSelected: {
     borderColor: theme.accent, backgroundColor: 'rgba(181,83,60,0.08)',
   },
-  dayCellDisabled: { opacity: 0.35 },
   dayNum: { fontFamily: fonts.mono, fontSize: 10, color: theme.fg },
   dayEmoji: { fontSize: 11, lineHeight: 13 },
+
+  capsuleDotRow: { flexDirection: 'row', gap: 2, marginTop: 1 },
+  capsuleDotCreated: { width: 4, height: 4, borderRadius: 2, backgroundColor: theme.accent },
+  capsuleDotUnlock: { width: 4, height: 4, borderRadius: 2, backgroundColor: 'transparent', borderWidth: 1, borderColor: theme.accent },
+
+  legend: { flexDirection: 'row', gap: 12, marginTop: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: theme.border },
+  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  legendText: { fontSize: 8, color: theme.muted, letterSpacing: 0.5 },
 
   formHeader: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14,
   },
+
+  lockedBanner: {
+    flexDirection: 'row', gap: 12, alignItems: 'flex-start',
+    padding: 12, borderRadius: 10,
+    backgroundColor: theme.bg, marginBottom: 14,
+  },
+  lockedIcon: { fontSize: 22, color: theme.muted, marginTop: 1 },
+  lockedTitle: { fontSize: 10, letterSpacing: 1.5, color: theme.muted, marginBottom: 4 },
+  lockedBody: { fontFamily: fonts.body, fontSize: 13, color: theme.muted, lineHeight: 19 },
+
+  readonlyEntry: {
+    padding: 12, borderRadius: 10,
+    backgroundColor: theme.bg, marginBottom: 14, gap: 6,
+  },
+  readonlyMood: { fontSize: 26 },
+  readonlyStars: { fontFamily: fonts.mono, fontSize: 16, color: theme.accent, letterSpacing: 2 },
+  readonlyIntention: { fontFamily: fonts.body, fontSize: 13, color: theme.fg, lineHeight: 19 },
+
+  capsulePrompt: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    padding: 14, borderRadius: 12,
+    borderWidth: 1, borderColor: theme.border,
+    backgroundColor: theme.bg,
+  },
+  capsulePromptIcon: { fontSize: 22, color: theme.accent },
+  capsulePromptMeta: { fontSize: 9, letterSpacing: 1.8, color: theme.muted, marginBottom: 3 },
+  capsulePromptTitle: { fontFamily: fonts.serif, fontSize: 17, color: theme.fg, lineHeight: 22, marginBottom: 3 },
+  capsulePromptBody: { fontFamily: fonts.body, fontSize: 12, color: theme.muted, lineHeight: 17 },
 
   moodRow: { flexDirection: 'row', gap: 6 },
   moodBtn: {
