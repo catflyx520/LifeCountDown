@@ -136,6 +136,7 @@ export default function DashboardScreen() {
             activeOpacity={0.75}
           >
             <Text style={styles.checkInBadgeText}>✓</Text>
+            <Text style={styles.checkInBadgeLabel}>{lang === 'zh' ? '已打卡' : 'Done'}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -282,11 +283,12 @@ const styles = StyleSheet.create({
   bigCount: { fontFamily: fonts.serif, fontSize: 36, color: theme.fg },
 
   checkInBadge: {
-    width: 32, height: 32, borderRadius: 16,
-    backgroundColor: theme.accent, alignItems: 'center', justifyContent: 'center',
-    marginLeft: 10,
+    flexDirection: 'row', alignItems: 'center', gap: 5,
+    paddingHorizontal: 10, paddingVertical: 6, borderRadius: 16,
+    backgroundColor: theme.accent, marginLeft: 10,
   },
-  checkInBadgeText: { fontFamily: fonts.mono, fontSize: 14, color: theme.accentFg },
+  checkInBadgeText: { fontFamily: fonts.mono, fontSize: 13, color: theme.accentFg },
+  checkInBadgeLabel: { fontFamily: fonts.mono, fontSize: 10, letterSpacing: 1.2, color: theme.accentFg },
 
   checkInCard: {
     flexDirection: 'row', alignItems: 'center', gap: 14,
