@@ -1,26 +1,29 @@
 import React, { useCallback, useState } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, KeyboardAvoidingView, Platform,
+  View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, KeyboardAvoidingView, Platform, Pressable,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { Eyebrow, SerifText, Card, MonoText } from '../components/UI';
 import { theme, fonts } from '../theme';
 import { loadUser, saveUser } from '../storage';
-import { Capsule } from '../types';
+import { Capsule, UserData } from '../types';
 import { useT } from '../i18n';
+import CapsuleDetailModal from './CapsuleDetailModal';
 
 
 export default function CapsuleScreen() {
   const insets = useSafeAreaInsets();
   const { s, lang } = useT();
   const [capsules, setCapsules] = useState<Capsule[]>([]);
+  const [user, setUser] = useState<UserData | null>(null);
+  const [selectedCapsule, setSelectedCapsule] = useState<Capsule | null>(null);
   const [draft, setDraft] = useState('');
   const [unlockDays, setUnlockDays] = useState(365);
   const [customInput, setCustomInput] = useState('');
 
   const reload = useCallback(() => {
-    loadUser().then(u => setCapsules(u.capsules ?? []));
+    loadUser().then(u => { setCapsules(u.capsules ?? []); setUser(u); });
   }, []);
 
   useFocusEffect(reload);
@@ -122,7 +125,11 @@ export default function CapsuleScreen() {
         const unlocked = isUnlocked(c);
         const daysLeft = Math.max(0, Math.ceil((new Date(c.unlockAt).getTime() - Date.now()) / 86400000));
         return (
-          <View key={c.id} style={[styles.letter, unlocked && styles.letterUnlocked]}>
+          <Pressable
+            key={c.id}
+            onPress={unlocked ? () => setSelectedCapsule(c) : undefined}
+            style={[styles.letter, unlocked && styles.letterUnlocked]}
+          >
             <View style={styles.letterHeader}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <View style={[styles.dot, unlocked && styles.dotUnlocked]}>
@@ -139,9 +146,18 @@ export default function CapsuleScreen() {
             <Text style={[styles.letterPreview, !unlocked && { color: 'transparent', textShadowColor: theme.muted, textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 8 }]}>
               "{unlocked ? c.text : '•'.repeat(40)}"
             </Text>
-          </View>
+          </Pressable>
         );
       })}
+
+      {user && (
+        <CapsuleDetailModal
+          capsule={selectedCapsule}
+          user={user}
+          visible={selectedCapsule !== null}
+          onClose={() => setSelectedCapsule(null)}
+        />
+      )}
     </ScrollView>
   );
 }
