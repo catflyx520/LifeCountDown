@@ -47,6 +47,13 @@ export default function CapsuleScreen() {
 
   const isUnlocked = (c: Capsule) => Date.now() >= new Date(c.unlockAt).getTime();
 
+  const burnCapsule = async (id: string) => {
+    const updated = capsules.filter(c => c.id !== id);
+    await saveUser({ capsules: updated });
+    setCapsules(updated);
+    setSelectedCapsule(null);
+  };
+
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: theme.bg }}
@@ -156,6 +163,7 @@ export default function CapsuleScreen() {
           user={user}
           visible={selectedCapsule !== null}
           onClose={() => setSelectedCapsule(null)}
+          onBurn={burnCapsule}
         />
       )}
     </ScrollView>

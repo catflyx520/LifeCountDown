@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   View, Text, Modal, ScrollView, TouchableOpacity,
-  Animated, Dimensions, StyleSheet, Pressable,
+  Animated, Dimensions, StyleSheet, Alert,
 } from 'react-native';
 import RAnimated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -87,11 +87,12 @@ interface Props {
   user: UserData;
   visible: boolean;
   onClose: () => void;
+  onBurn: (id: string) => void;
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export default function CapsuleDetailModal({ capsule, user, visible, onClose }: Props) {
+export default function CapsuleDetailModal({ capsule, user, visible, onClose, onBurn }: Props) {
   const insets = useSafeAreaInsets();
   const [phase, setPhase] = useState<Phase>('sealed');
   const [letterReady, setLetterReady] = useState(false);
@@ -253,7 +254,7 @@ export default function CapsuleDetailModal({ capsule, user, visible, onClose }: 
 
       {/* ── Phase 3: Letter ──────────────────────────────────────────────────── */}
       {phase === 'letter' && (
-        <RAnimated.View entering={FadeIn.duration(500)} style={[StyleSheet.absoluteFill, { backgroundColor: theme.bg }]}>
+        <RAnimated.View entering={FadeIn.duration(500)} style={[StyleSheet.absoluteFill, { backgroundColor: DARK }]}>
           <ScrollView
             contentContainerStyle={[s.letterScroll, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 40 }]}
             showsVerticalScrollIndicator={false}
@@ -268,10 +269,17 @@ export default function CapsuleDetailModal({ capsule, user, visible, onClose }: 
 
             {/* Metadata grid */}
             <View style={s.metaGrid}>
-              <MetaCell label="sealed" value={fmtDate(capsule.createdAt)} />
-              <MetaCell label="waited" value={`${numWithCommas(daysWaited)} days`} accent />
-              <MetaCell label="you were" value={`${user.age} yrs old`} />
-              <MetaCell label="days then" value={numWithCommas(daysRemainingThen)} />
+              <View style={s.metaRow}>
+                <MetaCell label="sealed" value={fmtDate(capsule.createdAt)} />
+                <View style={s.metaDividerV} />
+                <MetaCell label="waited" value={`${numWithCommas(daysWaited)} days`} accent />
+              </View>
+              <View style={s.metaDividerH} />
+              <View style={s.metaRow}>
+                <MetaCell label="you were" value={`${user.age} yrs old`} />
+                <View style={s.metaDividerV} />
+                <MetaCell label="days then" value={numWithCommas(daysRemainingThen)} />
+              </View>
             </View>
 
             {/* Letter body */}
@@ -299,8 +307,20 @@ export default function CapsuleDetailModal({ capsule, user, visible, onClose }: 
               <TouchableOpacity style={s.actionGhost} onPress={onClose}>
                 <Text style={s.actionGhostText}>Keep on shelf</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={s.actionGhost} onPress={onClose}>
-                <Text style={s.actionGhostText}>Close quietly</Text>
+              <TouchableOpacity
+                style={s.actionBurn}
+                onPress={() => {
+                  Alert.alert(
+                    'Burn this letter?',
+                    'It will be gone forever. No going back.',
+                    [
+                      { text: 'Cancel', style: 'cancel' },
+                      { text: 'Burn it', style: 'destructive', onPress: () => onBurn(capsule!.id) },
+                    ]
+                  );
+                }}
+              >
+                <Text style={s.actionBurnText}>Burn the letter</Text>
               </TouchableOpacity>
             </View>
           </ScrollView>
@@ -381,33 +401,42 @@ const s = StyleSheet.create({
   // Letter
   letterScroll: { paddingHorizontal: 24 },
   letterHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-  letterHeaderLabel: { fontFamily: fonts.mono, fontSize: 10, color: theme.muted, letterSpacing: 1.5 },
+  letterHeaderLabel: { fontFamily: fonts.mono, fontSize: 10, color: 'rgba(245,236,214,0.4)', letterSpacing: 1.5 },
   closeBtn: {
     width: 32, height: 32, borderRadius: 16,
-    borderWidth: 1, borderColor: theme.border,
+    borderWidth: 1, borderColor: 'rgba(245,236,214,0.2)',
     alignItems: 'center', justifyContent: 'center',
   },
-  closeBtnText: { fontFamily: fonts.body, fontSize: 18, color: theme.fg, lineHeight: 32 },
+  closeBtnText: { fontFamily: fonts.body, fontSize: 18, color: 'rgba(245,236,214,0.7)', lineHeight: 32 },
 
   // Metadata grid
-  metaGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 1, marginBottom: 28, borderRadius: 12, overflow: 'hidden', backgroundColor: theme.border },
-  metaCell: { width: '50%', backgroundColor: theme.surface, paddingVertical: 14, paddingHorizontal: 16 },
-  metaLabel: { fontFamily: fonts.mono, fontSize: 9, color: theme.muted, letterSpacing: 1, marginBottom: 4 },
-  metaValue: { fontFamily: fonts.serif, fontSize: 16, color: theme.fg },
+  metaGrid: { marginBottom: 28, borderRadius: 12, overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(181,83,60,0.25)' },
+  metaRow: { flexDirection: 'row' },
+  metaDividerH: { height: 1, backgroundColor: 'rgba(181,83,60,0.2)' },
+  metaDividerV: { width: 1, backgroundColor: 'rgba(181,83,60,0.2)' },
+  metaCell: { flex: 1, backgroundColor: '#2a1f15', paddingVertical: 14, paddingHorizontal: 16 },
+  metaLabel: { fontFamily: fonts.mono, fontSize: 9, color: 'rgba(245,236,214,0.35)', letterSpacing: 1, marginBottom: 4 },
+  metaValue: { fontFamily: fonts.serif, fontSize: 16, color: 'rgba(245,236,214,0.9)' },
 
   // Letter body
   letterBody: { marginBottom: 32 },
   letterGreeting: { fontFamily: fonts.serifItalic, fontSize: 22, color: theme.accent, marginBottom: 16, lineHeight: 30 },
   wordWrap: { flexDirection: 'row', flexWrap: 'wrap' },
-  letterWord: { fontFamily: fonts.serif, fontSize: 17, color: theme.fg, lineHeight: 28 },
-  letterSignoff: { fontFamily: fonts.serifItalic, fontSize: 15, color: theme.muted, marginTop: 8 },
+  letterWord: { fontFamily: fonts.serif, fontSize: 17, color: 'rgba(245,236,214,0.88)', lineHeight: 28 },
+  letterSignoff: { fontFamily: fonts.serifItalic, fontSize: 15, color: 'rgba(245,236,214,0.4)', marginTop: 8 },
 
   // Actions
   actions: { flexDirection: 'row', gap: 12 },
   actionGhost: {
     flex: 1, paddingVertical: 12, borderRadius: 24,
-    borderWidth: 1, borderColor: theme.border,
+    borderWidth: 1, borderColor: 'rgba(245,236,214,0.18)',
     alignItems: 'center',
   },
-  actionGhostText: { fontFamily: fonts.mono, fontSize: 10, color: theme.muted, letterSpacing: 1 },
+  actionGhostText: { fontFamily: fonts.mono, fontSize: 10, color: 'rgba(245,236,214,0.45)', letterSpacing: 1 },
+  actionBurn: {
+    flex: 1, paddingVertical: 12, borderRadius: 24,
+    borderWidth: 1, borderColor: 'rgba(181,83,60,0.45)',
+    alignItems: 'center',
+  },
+  actionBurnText: { fontFamily: fonts.mono, fontSize: 10, color: theme.accent, letterSpacing: 1 },
 });
