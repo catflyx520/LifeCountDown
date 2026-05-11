@@ -6,6 +6,7 @@ export interface Capsule {
   createdAt: string;   // ISO date string
   unlockAt: string;    // ISO date string
   unlockDays: number;
+  readAt?: string;     // ISO date string, set on first open
 }
 
 export interface CheckIn {

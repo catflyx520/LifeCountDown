@@ -61,6 +61,15 @@ export default function CapsuleScreen() {
 
   const isUnlocked = (c: Capsule) => Date.now() >= new Date(c.unlockAt).getTime();
 
+  const openCapsule = async (c: Capsule) => {
+    setSelectedCapsule(c);
+    if (!c.readAt) {
+      const updated = capsules.map(x => x.id === c.id ? { ...x, readAt: new Date().toISOString() } : x);
+      await saveUser({ capsules: updated });
+      setCapsules(updated);
+    }
+  };
+
   const burnCapsule = async (id: string) => {
     const updated = capsules.filter(c => c.id !== id);
     await saveUser({ capsules: updated });
@@ -169,12 +178,15 @@ export default function CapsuleScreen() {
 
       {[...capsules].reverse().map(c => {
         const unlocked = isUnlocked(c);
+        const isRead = !!c.readAt;
         const daysLeft = Math.max(0, Math.ceil((new Date(c.unlockAt).getTime() - Date.now()) / 86400000));
+        const unlockDateFmt = new Date(c.unlockAt).toLocaleDateString(lang === 'zh' ? 'zh-CN' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        const readDateFmt = c.readAt ? new Date(c.readAt).toLocaleDateString(lang === 'zh' ? 'zh-CN' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : null;
         return (
           <Pressable
             key={c.id}
-            onPress={unlocked ? () => setSelectedCapsule(c) : undefined}
-            style={[styles.letter, unlocked && styles.letterUnlocked]}
+            onPress={unlocked ? () => openCapsule(c) : undefined}
+            style={[styles.letter, isRead && styles.letterRead]}
           >
             <View style={styles.letterHeader}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -183,11 +195,25 @@ export default function CapsuleScreen() {
                     {unlocked ? '✓' : '✕'}
                   </Text>
                 </View>
-                <Eyebrow style={{ color: unlocked ? theme.accent : theme.muted }}>
-                  {unlocked ? s.unlockedOn : `${s.unlockIn} ${s.daysShort(daysLeft)}`}
-                </Eyebrow>
+                <View>
+                  <Eyebrow style={{ color: unlocked ? theme.accent : theme.muted }}>
+                    {unlocked
+                      ? `${s.unlockedOn} ${unlockDateFmt}`
+                      : `${s.unlockIn} ${s.daysShort(daysLeft)}`}
+                  </Eyebrow>
+                  {!unlocked && (
+                    <MonoText style={{ fontSize: 8, color: theme.muted, marginTop: 1 }}>{unlockDateFmt}</MonoText>
+                  )}
+                  {unlocked && isRead && readDateFmt && (
+                    <MonoText style={{ fontSize: 8, color: theme.muted, marginTop: 1 }}>
+                      {lang === 'zh' ? `阅读于 ${readDateFmt}` : `Read ${readDateFmt}`}
+                    </MonoText>
+                  )}
+                </View>
               </View>
-              <MonoText style={{ fontSize: 9 }}>{unlocked ? s.tapToRead : s.locked}</MonoText>
+              <MonoText style={{ fontSize: 9, color: unlocked ? (isRead ? theme.accent : theme.muted) : theme.muted }}>
+                {unlocked ? (isRead ? s.capsuleRead : s.capsuleUnread) : s.locked}
+              </MonoText>
             </View>
             <Text style={[styles.letterPreview, !unlocked && { color: 'transparent', textShadowColor: theme.muted, textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 8 }]}>
               "{unlocked ? c.text : '•'.repeat(40)}"
@@ -246,7 +272,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.surface, borderWidth: 1, borderColor: theme.border,
     opacity: 0.85,
   },
-  letterUnlocked: { opacity: 1, borderColor: theme.accent },
+  letterRead: { opacity: 1, borderColor: theme.accent },
   letterHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
   dot: {
     width: 20, height: 20, borderRadius: 10,
