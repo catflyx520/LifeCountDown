@@ -40,6 +40,7 @@ export type RootStackParamList = {
   Main: undefined;
   Hourglass: undefined;
   WidgetPreview: undefined;
+  PrivacyPolicy: undefined;
 };
 
 export type MainTabParamList = {

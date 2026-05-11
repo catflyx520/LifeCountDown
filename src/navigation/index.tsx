@@ -18,6 +18,7 @@ import CheckInScreen from '../screens/CheckInScreen';
 import CapsuleScreen from '../screens/CapsuleScreen';
 import HourglassScreen from '../screens/HourglassScreen';
 import WidgetPreviewScreen from '../screens/WidgetPreviewScreen';
+import PrivacyPolicyScreen from '../screens/PrivacyPolicyScreen';
 import CommunityScreen from '../screens/CommunityScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 
@@ -109,6 +110,7 @@ export default function Navigation() {
         <Stack.Screen name="Main" component={MainTabs} />
         <Stack.Screen name="Hourglass" component={HourglassScreen} />
         <Stack.Screen name="WidgetPreview" component={WidgetPreviewScreen} />
+        <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

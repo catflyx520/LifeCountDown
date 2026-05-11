@@ -178,10 +178,11 @@ export default function QuizScreen({ navigation }: Props) {
           </View>
 
           <View style={styles.conditionsButtons}>
-            <TouchableOpacity onPress={() => confirmName('')} style={styles.skipBtn}>
-              <Text style={styles.skipBtnText}>{s.skip}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => confirmName(nameInput)} style={styles.continueBtn}>
+            <TouchableOpacity
+              onPress={() => confirmName(nameInput)}
+              style={[styles.continueBtn, !nameInput.trim() && { opacity: 0.4 }]}
+              disabled={!nameInput.trim()}
+            >
               <Text style={styles.continueBtnText}>{s.showMyNumber}</Text>
             </TouchableOpacity>
           </View>
