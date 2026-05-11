@@ -177,36 +177,6 @@ export default function DashboardScreen() {
         </TouchableOpacity>
       )}
 
-      {/* age card */}
-      <Card style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-        <View>
-          <Eyebrow style={{ fontSize: 9, marginBottom: 6 }}>{s.youAre}</Eyebrow>
-          <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
-            <Text style={styles.ageNumber}>{displayAge}</Text>
-            <Text style={{ fontFamily: fonts.mono, fontSize: 11, color: theme.muted, marginBottom: 6, marginLeft: 4 }}>{s.yrs}</Text>
-          </View>
-        </View>
-        <View style={{ alignItems: 'flex-end' }}>
-          {nextBday !== null ? (
-            <>
-              <Eyebrow style={{ fontSize: 9, marginBottom: 6 }}>{s.nextBirthday}</Eyebrow>
-              <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
-                <Text style={[styles.sideNumber, { color: theme.accent }]}>{nextBday}</Text>
-                <Text style={{ fontFamily: fonts.mono, fontSize: 9, color: theme.muted, marginBottom: 4, marginLeft: 3 }}>{s.days}</Text>
-              </View>
-            </>
-          ) : (
-            <>
-              <Eyebrow style={{ fontSize: 9, marginBottom: 6 }}>{s.target}</Eyebrow>
-              <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
-                <Text style={styles.sideNumber}>{user.targetAge}</Text>
-                <Text style={{ fontFamily: fonts.mono, fontSize: 9, color: theme.muted, marginBottom: 4, marginLeft: 3 }}>{s.yrs}</Text>
-              </View>
-            </>
-          )}
-        </View>
-      </Card>
-
       {/* stats + inline bars */}
       <View style={styles.statsCard}>
         <StatRow
@@ -225,7 +195,7 @@ export default function DashboardScreen() {
         <View style={styles.divider} />
         <StatRow
           label={lang === 'zh' ? '人生进度' : 'Life progress'}
-          value={`${lifePct.toFixed(1)}%`}
+          value={`${displayAge} / ${user.targetAge} ${s.yrs}`}
           sub={lang === 'zh' ? `还剩 ${user.daysLeft.toLocaleString()} 天` : `${user.daysLeft.toLocaleString()} days left`}
           pct={lifePct}
         />
