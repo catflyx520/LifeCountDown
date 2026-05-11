@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   View, Text, Modal, ScrollView, TouchableOpacity,
-  Animated, Dimensions, StyleSheet, Alert,
+  Animated, Dimensions, StyleSheet,
 } from 'react-native';
 import RAnimated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -80,7 +80,7 @@ function Particle({ sx, sy, delay }: { sx: number; sy: number; delay: number }) 
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Phase = 'sealed' | 'ritual' | 'letter';
+type Phase = 'sealed' | 'ritual' | 'letter' | 'confirm-burn';
 
 interface Props {
   capsule: Capsule | null;
@@ -309,22 +309,30 @@ export default function CapsuleDetailModal({ capsule, user, visible, onClose, on
               </TouchableOpacity>
               <TouchableOpacity
                 style={s.actionBurn}
-                onPress={() => {
-                  Alert.alert(
-                    'Burn this letter?',
-                    'It will be gone forever. No going back.',
-                    [
-                      { text: 'Cancel', style: 'cancel' },
-                      { text: 'Burn it', style: 'destructive', onPress: () => onBurn(capsule!.id) },
-                    ]
-                  );
-                }}
+                onPress={() => setPhase('confirm-burn')}
               >
                 <Text style={s.actionBurnText}>Burn the letter</Text>
               </TouchableOpacity>
             </View>
           </ScrollView>
         </RAnimated.View>
+      )}
+      {/* ── Confirm burn ─────────────────────────────────────────────────────── */}
+      {phase === 'confirm-burn' && (
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: DARK, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 36 }]}>
+          <Text style={s.burnTitle}>Burn this letter?</Text>
+          <Text style={s.burnBody}>
+            It will be gone forever.{'\n'}No going back.
+          </Text>
+          <View style={s.burnActions}>
+            <TouchableOpacity style={s.burnCancel} onPress={() => setPhase('letter')}>
+              <Text style={s.burnCancelText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={s.burnConfirm} onPress={() => onBurn(capsule!.id)}>
+              <Text style={s.burnConfirmText}>Burn it</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       )}
     </Modal>
   );
@@ -439,4 +447,21 @@ const s = StyleSheet.create({
     alignItems: 'center',
   },
   actionBurnText: { fontFamily: fonts.mono, fontSize: 10, color: theme.accent, letterSpacing: 1 },
+
+  // Confirm burn
+  burnTitle: { fontFamily: fonts.serif, fontSize: 26, color: theme.accentFg, textAlign: 'center', lineHeight: 34, marginBottom: 14 },
+  burnBody: { fontFamily: fonts.body, fontSize: 14, color: 'rgba(245,236,214,0.45)', textAlign: 'center', lineHeight: 22, marginBottom: 40 },
+  burnActions: { flexDirection: 'row', gap: 12, width: '100%' },
+  burnCancel: {
+    flex: 1, paddingVertical: 14, borderRadius: 28,
+    borderWidth: 1, borderColor: 'rgba(245,236,214,0.18)',
+    alignItems: 'center',
+  },
+  burnCancelText: { fontFamily: fonts.mono, fontSize: 11, color: 'rgba(245,236,214,0.55)', letterSpacing: 1.2 },
+  burnConfirm: {
+    flex: 1, paddingVertical: 14, borderRadius: 28,
+    backgroundColor: theme.accent,
+    alignItems: 'center',
+  },
+  burnConfirmText: { fontFamily: fonts.mono, fontSize: 11, color: theme.accentFg, letterSpacing: 1.2 },
 });
