@@ -126,8 +126,9 @@ Full ceremonial reveal implemented in `src/screens/CapsuleDetailModal.tsx`:
 
 - **Phase 1 — Sealed view**: dark background (`#1a1410`), 3 concentric pulsing rings (RN Animated loop), seal monogram, `"A letter from past you."` hero text, `"Open Seal →"` button
 - **Phase 2 — Ritual**: 24 particles fly from screen edges to center (RN `Animated.ValueXY`), bloom circle expands + fades after 1800ms, skip button fades in at 800ms, auto-advances to letter at 2600ms
-- **Phase 3 — Letter**: `FadeIn` entrance (Reanimated), metadata grid (sealed date / days waited / age / days then), word-by-word reveal via `FadeInDown.delay(i*28)` on individual word views in `flexWrap` row
-- **CapsuleScreen**: unlocked capsule items now tappable (`Pressable`) → opens modal; full `UserData` loaded on focus for modal props
+- **Phase 3 — Letter**: same dark bg (`#1a1410`) as sealed/ritual, `FadeIn` entrance (Reanimated), metadata grid (sealed date / days waited / age / days then) with dark cells (`#2a1f15`), word-by-word reveal via `FadeInDown.delay(i*28)`, cream text palette
+- **Actions**: "Keep on shelf" closes modal; "Burn the letter" shows `Alert.alert` confirmation then deletes capsule from storage via `onBurn` prop
+- **CapsuleScreen**: unlocked capsule items now tappable (`Pressable`) → opens modal; full `UserData` loaded on focus; `burnCapsule` handler filters + saves + closes modal
 
 ## What to do next
 
