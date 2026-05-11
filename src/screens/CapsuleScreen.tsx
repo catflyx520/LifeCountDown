@@ -20,7 +20,21 @@ export default function CapsuleScreen() {
   const [selectedCapsule, setSelectedCapsule] = useState<Capsule | null>(null);
   const [draft, setDraft] = useState('');
   const [unlockDays, setUnlockDays] = useState(365);
-  const [customInput, setCustomInput] = useState('');
+  const [customYears, setCustomYears] = useState('');
+  const [customMonths, setCustomMonths] = useState('');
+  const [customDaysInput, setCustomDaysInput] = useState('');
+
+  const isCustomMode = customYears !== '' || customMonths !== '' || customDaysInput !== '';
+
+  const applyCustom = (y: string, mo: string, d: string) => {
+    const total = (parseInt(y || '0', 10) * 365) + (parseInt(mo || '0', 10) * 30) + (parseInt(d || '0', 10));
+    setUnlockDays(total);
+  };
+
+  const unlockDate = new Date(Date.now() + unlockDays * 86400000);
+  const unlockDateStr = unlockDate.toLocaleDateString(lang === 'zh' ? 'zh-CN' : 'en-US', {
+    year: 'numeric', month: 'long', day: 'numeric',
+  });
 
   const reload = useCallback(() => {
     loadUser().then(u => { setCapsules(u.capsules ?? []); setUser(u); });
@@ -80,35 +94,60 @@ export default function CapsuleScreen() {
           {s.unlockOptions.map(o => (
             <TouchableOpacity
               key={o.days}
-              onPress={() => { setUnlockDays(o.days); setCustomInput(''); }}
-              style={[styles.unlockBtn, unlockDays === o.days && !customInput && styles.unlockBtnActive]}
+              onPress={() => { setUnlockDays(o.days); setCustomYears(''); setCustomMonths(''); setCustomDaysInput(''); }}
+              style={[styles.unlockBtn, unlockDays === o.days && !isCustomMode && styles.unlockBtnActive]}
             >
-              <Text style={[styles.unlockBtnText, unlockDays === o.days && !customInput && { color: theme.accentFg }]}>
+              <Text style={[styles.unlockBtnText, unlockDays === o.days && !isCustomMode && { color: theme.accentFg }]}>
                 {o.label}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
-        {/* 自定义天数 */}
-        <View style={styles.customRow}>
-          <MonoText style={{ fontSize: 9, color: theme.muted }}>{s.customDays}</MonoText>
-          <TextInput
-            value={customInput}
-            onChangeText={v => {
-              const n = v.replace(/[^0-9]/g, '');
-              setCustomInput(n);
-              if (n !== '') setUnlockDays(parseInt(n, 10) || 0);
-            }}
-            placeholder="0"
-            placeholderTextColor={theme.muted}
-            keyboardType="number-pad"
-            style={[styles.customInput, customInput !== '' && styles.customInputActive]}
-          />
-          <MonoText style={{ fontSize: 9, color: theme.muted }}>{lang === 'zh' ? '天' : 'days'}</MonoText>
+        {/* 自定义 */}
+        <View style={styles.customSection}>
+          <MonoText style={styles.customLabel}>{s.customDays}</MonoText>
+          <View style={styles.customRow}>
+            <View style={styles.customUnit}>
+              <TextInput
+                value={customYears}
+                onChangeText={v => { const n = v.replace(/[^0-9]/g, ''); setCustomYears(n); applyCustom(n, customMonths, customDaysInput); }}
+                placeholder="0"
+                placeholderTextColor={theme.muted}
+                keyboardType="number-pad"
+                style={[styles.customInput, customYears !== '' && styles.customInputActive]}
+              />
+              <MonoText style={styles.customUnitLabel}>{lang === 'zh' ? '年' : 'yr'}</MonoText>
+            </View>
+            <View style={styles.customUnit}>
+              <TextInput
+                value={customMonths}
+                onChangeText={v => { const n = v.replace(/[^0-9]/g, ''); setCustomMonths(n); applyCustom(customYears, n, customDaysInput); }}
+                placeholder="0"
+                placeholderTextColor={theme.muted}
+                keyboardType="number-pad"
+                style={[styles.customInput, customMonths !== '' && styles.customInputActive]}
+              />
+              <MonoText style={styles.customUnitLabel}>{lang === 'zh' ? '月' : 'mo'}</MonoText>
+            </View>
+            <View style={styles.customUnit}>
+              <TextInput
+                value={customDaysInput}
+                onChangeText={v => { const n = v.replace(/[^0-9]/g, ''); setCustomDaysInput(n); applyCustom(customYears, customMonths, n); }}
+                placeholder="0"
+                placeholderTextColor={theme.muted}
+                keyboardType="number-pad"
+                style={[styles.customInput, customDaysInput !== '' && styles.customInputActive]}
+              />
+              <MonoText style={styles.customUnitLabel}>{lang === 'zh' ? '天' : 'd'}</MonoText>
+            </View>
+          </View>
         </View>
 
         <View style={styles.sealRow}>
-          <MonoText style={{ fontSize: 9 }}>{s.opensIn(unlockDays)}</MonoText>
+          <View>
+            <MonoText style={{ fontSize: 9 }}>{s.opensIn(unlockDays)}</MonoText>
+            <MonoText style={{ fontSize: 9, color: theme.muted, marginTop: 2 }}>{unlockDateStr}</MonoText>
+          </View>
           <TouchableOpacity
             onPress={seal}
             style={[styles.sealBtn, !draft.trim() && { opacity: 0.4 }]}
@@ -177,21 +216,25 @@ const styles = StyleSheet.create({
     color: theme.fg, minHeight: 80,
     marginBottom: 12,
   },
-  unlockRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 },
-  customRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
+  unlockRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10 },
+  customSection: { marginBottom: 12 },
+  customLabel: { fontSize: 9, color: theme.muted, marginBottom: 6 },
+  customRow: { flexDirection: 'row', gap: 8 },
+  customUnit: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   customInput: {
     fontFamily: fonts.mono, fontSize: 13, color: theme.fg,
     borderWidth: 1, borderColor: theme.border, borderRadius: 8,
-    paddingHorizontal: 10, paddingVertical: 5, minWidth: 60, textAlign: 'center',
+    paddingHorizontal: 8, paddingVertical: 5, width: 52, textAlign: 'center',
   },
   customInputActive: { borderColor: theme.accent },
+  customUnitLabel: { fontSize: 9, color: theme.muted },
   unlockBtn: {
     paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8,
     borderWidth: 1, borderColor: theme.border,
   },
   unlockBtnActive: { backgroundColor: theme.accent, borderColor: theme.accent },
   unlockBtnText: { fontFamily: fonts.mono, fontSize: 9, letterSpacing: 1, color: theme.muted },
-  sealRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  sealRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
   sealBtn: {
     paddingHorizontal: 16, paddingVertical: 8, borderRadius: 8,
     backgroundColor: theme.accent,

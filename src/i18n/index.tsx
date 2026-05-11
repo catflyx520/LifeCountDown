@@ -126,10 +126,10 @@ const en = {
 
   // Capsule unlock options
   unlockOptions: [
-    { label: '30 days',  days: 30 },
-    { label: '1 year',   days: 365 },
-    { label: '5 years',  days: 1825 },
-    { label: '10 years', days: 3650 },
+    { label: '30 days', days: 30 },
+    { label: '6 months', days: 180 },
+    { label: '1 year',  days: 365 },
+    { label: '2 years', days: 730 },
   ],
   daysShort: (n: number) => `${n}d`,
 
@@ -372,9 +372,9 @@ const zh: typeof en = {
 
   unlockOptions: [
     { label: '30 天',  days: 30 },
+    { label: '半年',   days: 180 },
     { label: '1 年',   days: 365 },
-    { label: '5 年',  days: 1825 },
-    { label: '10 年', days: 3650 },
+    { label: '2 年',   days: 730 },
   ],
   daysShort: (n: number) => `${n}天`,
 
