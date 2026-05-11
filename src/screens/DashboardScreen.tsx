@@ -196,7 +196,7 @@ export default function DashboardScreen() {
         <StatRow
           label={lang === 'zh' ? '人生进度' : 'Life progress'}
           value={`${displayAge} / ${user.targetAge} ${s.yrs}`}
-          sub={lang === 'zh' ? `还剩 ${user.daysLeft.toLocaleString()} 天` : `${user.daysLeft.toLocaleString()} days left`}
+          sub={lang === 'zh' ? `${lifePct.toFixed(1)}% · 还剩 ${user.daysLeft.toLocaleString()} 天` : `${lifePct.toFixed(1)}% · ${user.daysLeft.toLocaleString()} days left`}
           pct={lifePct}
         />
       </View>
