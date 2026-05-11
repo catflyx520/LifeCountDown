@@ -86,6 +86,11 @@ export default function DashboardScreen() {
   const lifePct = Math.min(100, (user.age * 365 / totalDays) * 100);
   const yearPct = Math.round((doy / 365) * 100);
 
+  const capsules = user.capsules ?? [];
+  const capsulesTotal = capsules.length;
+  const capsulesUnlocked = capsules.filter(c => Date.now() >= new Date(c.unlockAt).getTime()).length;
+  const capsulesPct = capsulesTotal > 0 ? Math.round((capsulesUnlocked / capsulesTotal) * 100) : 0;
+
   const displayAge = user.birthdate ? ageFromBirthdate(user.birthdate) : user.age;
   const nextBday = user.birthdate ? daysUntilBirthday(user.birthdate) : null;
 
@@ -176,27 +181,27 @@ export default function DashboardScreen() {
       <Card style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
         <View>
           <Eyebrow style={{ fontSize: 9, marginBottom: 6 }}>{s.youAre}</Eyebrow>
-          <Text style={styles.ageNumber}>
-            {displayAge}
-            <Text style={{ fontFamily: fonts.mono, fontSize: 12, color: theme.muted }}> {s.yrs}</Text>
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
+            <Text style={styles.ageNumber}>{displayAge}</Text>
+            <Text style={{ fontFamily: fonts.mono, fontSize: 11, color: theme.muted, marginBottom: 6, marginLeft: 4 }}>{s.yrs}</Text>
+          </View>
         </View>
         <View style={{ alignItems: 'flex-end' }}>
           {nextBday !== null ? (
             <>
               <Eyebrow style={{ fontSize: 9, marginBottom: 6 }}>{s.nextBirthday}</Eyebrow>
-              <Text style={[styles.sideNumber, { color: theme.accent }]}>
-                {nextBday}
-                <Text style={{ fontFamily: fonts.mono, fontSize: 10, color: theme.muted }}> {s.days}</Text>
-              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
+                <Text style={[styles.sideNumber, { color: theme.accent }]}>{nextBday}</Text>
+                <Text style={{ fontFamily: fonts.mono, fontSize: 9, color: theme.muted, marginBottom: 4, marginLeft: 3 }}>{s.days}</Text>
+              </View>
             </>
           ) : (
             <>
               <Eyebrow style={{ fontSize: 9, marginBottom: 6 }}>{s.target}</Eyebrow>
-              <Text style={styles.sideNumber}>
-                {user.targetAge}
-                <Text style={{ fontFamily: fonts.mono, fontSize: 10, color: theme.muted }}> {s.yrs}</Text>
-              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
+                <Text style={styles.sideNumber}>{user.targetAge}</Text>
+                <Text style={{ fontFamily: fonts.mono, fontSize: 9, color: theme.muted, marginBottom: 4, marginLeft: 3 }}>{s.yrs}</Text>
+              </View>
             </>
           )}
         </View>
@@ -226,6 +231,29 @@ export default function DashboardScreen() {
         />
       </View>
 
+      {/* capsule count */}
+      <Card style={{ marginBottom: 10 }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: capsulesTotal > 0 ? 10 : 0 }}>
+          <View>
+            <Eyebrow style={{ marginBottom: 4 }}>{s.timeCapsules}</Eyebrow>
+            <MonoText style={{ fontSize: 9 }}>{s.lettersToSelf}</MonoText>
+          </View>
+          <View style={{ alignItems: 'flex-end' }}>
+            <Text style={styles.bigCount}>{capsulesTotal}</Text>
+            {capsulesTotal > 0 && (
+              <MonoText style={{ fontSize: 9, color: theme.muted, marginTop: 2 }}>
+                {capsulesUnlocked}/{capsulesTotal} {lang === 'zh' ? '已解锁' : 'unlocked'}
+              </MonoText>
+            )}
+          </View>
+        </View>
+        {capsulesTotal > 0 && (
+          <View style={rowStyles.track}>
+            <View style={[rowStyles.fill, { width: `${capsulesPct}%` as any }]} />
+          </View>
+        )}
+      </Card>
+
       {/* daily message */}
       {message && (
         <View style={styles.messageCard}>
@@ -236,15 +264,6 @@ export default function DashboardScreen() {
           <Text style={styles.messageBody}>{message.body}</Text>
         </View>
       )}
-
-      {/* capsule count */}
-      <Card style={{ marginBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <View>
-          <Eyebrow style={{ marginBottom: 4 }}>{s.timeCapsules}</Eyebrow>
-          <MonoText style={{ fontSize: 9 }}>{s.lettersToSelf}</MonoText>
-        </View>
-        <Text style={styles.bigCount}>{user.capsules?.length ?? 0}</Text>
-      </Card>
 
       {/* links */}
       <TouchableOpacity
