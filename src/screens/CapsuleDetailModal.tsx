@@ -6,6 +6,7 @@ import {
 import RAnimated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme, fonts } from '../theme';
+import { useT } from '../i18n';
 import type { Capsule, UserData } from '../types';
 
 const { width: W, height: H } = Dimensions.get('window');
@@ -13,18 +14,22 @@ const DARK = '#1a1410';
 const PARTICLE_COUNT = 24;
 
 const MONTHS = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
-const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const DAYS_EN = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const DAYS_ZH = ['周日','周一','周二','周三','周四','周五','周六'];
 
-function fmtDate(iso: string): string {
+function fmtDate(iso: string, lang: string): string {
   const d = new Date(iso);
+  if (lang === 'zh') return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
   return `${MONTHS[d.getMonth()]} ${d.getDate()}, '${d.getFullYear().toString().slice(2)}`;
 }
-function fmtDateShort(iso: string): string {
+function fmtDateShort(iso: string, lang: string): string {
   const d = new Date(iso);
+  if (lang === 'zh') return `${d.getFullYear()}年${d.getMonth()+1}月`;
   return `${MONTHS[d.getMonth()]} '${d.getFullYear().toString().slice(2)}`;
 }
-function dayOfWeek(iso: string): string {
-  return DAYS[new Date(iso).getDay()];
+function dayOfWeek(iso: string, lang: string): string {
+  const idx = new Date(iso).getDay();
+  return lang === 'zh' ? DAYS_ZH[idx] : DAYS_EN[idx];
 }
 function numWithCommas(n: number): string {
   return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -94,6 +99,7 @@ interface Props {
 
 export default function CapsuleDetailModal({ capsule, user, visible, onClose, onBurn }: Props) {
   const insets = useSafeAreaInsets();
+  const { s: t, lang } = useT();
   const [phase, setPhase] = useState<Phase>('sealed');
   const [letterReady, setLetterReady] = useState(false);
 
@@ -197,7 +203,7 @@ export default function CapsuleDetailModal({ capsule, user, visible, onClose, on
               <Text style={s.backText}>← Capsule</Text>
             </TouchableOpacity>
             <View style={s.chip}>
-              <Text style={s.chipText}>unlocked</Text>
+              <Text style={s.chipText}>{t.capsuleChipUnlocked}</Text>
             </View>
           </View>
 
@@ -212,16 +218,14 @@ export default function CapsuleDetailModal({ capsule, user, visible, onClose, on
             </View>
           </View>
 
-          <Text style={s.sealedLabel}>sealed {fmtDateShort(capsule.createdAt)}</Text>
+          <Text style={s.sealedLabel}>{t.capsuleSealedLabel(fmtDateShort(capsule.createdAt, lang))}</Text>
           <Text style={s.heroTitle}>
-            A letter from{'\n'}<Text style={s.heroAccent}>past you.</Text>
+            {t.capsuleHeroTitle}{'\n'}<Text style={s.heroAccent}>{t.capsuleHeroPastYou}</Text>
           </Text>
-          <Text style={s.heroSub}>
-            You sealed this on a {dayOfWeek(capsule.createdAt)}.{'\n'}It's been waiting.
-          </Text>
+          <Text style={s.heroSub}>{t.capsuleHeroSub(dayOfWeek(capsule.createdAt, lang))}</Text>
 
           <TouchableOpacity style={s.openBtn} onPress={() => setPhase('ritual')}>
-            <Text style={s.openBtnText}>OPEN SEAL →</Text>
+            <Text style={s.openBtnText}>{t.capsuleOpenSeal}</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -241,7 +245,7 @@ export default function CapsuleDetailModal({ capsule, user, visible, onClose, on
           {/* Skip button */}
           <Animated.View style={[s.skipWrap, { top: insets.top + 16, opacity: skipOpacity }]}>
             <TouchableOpacity onPress={() => setPhase('letter')} style={s.skipBtn}>
-              <Text style={s.skipText}>skip</Text>
+              <Text style={s.skipText}>{t.capsuleSkip}</Text>
             </TouchableOpacity>
           </Animated.View>
 
@@ -261,7 +265,7 @@ export default function CapsuleDetailModal({ capsule, user, visible, onClose, on
           >
             {/* Header */}
             <View style={s.letterHeader}>
-              <Text style={s.letterHeaderLabel}>Letter · 01</Text>
+              <Text style={s.letterHeaderLabel}>{t.capsuleLetterLabel}</Text>
               <TouchableOpacity onPress={onClose} style={s.closeBtn}>
                 <Text style={s.closeBtnText}>×</Text>
               </TouchableOpacity>
@@ -270,21 +274,21 @@ export default function CapsuleDetailModal({ capsule, user, visible, onClose, on
             {/* Metadata grid */}
             <View style={s.metaGrid}>
               <View style={s.metaRow}>
-                <MetaCell label="sealed" value={fmtDate(capsule.createdAt)} />
+                <MetaCell label={t.capsuleMetaSealed} value={fmtDate(capsule.createdAt, lang)} />
                 <View style={s.metaDividerV} />
-                <MetaCell label="waited" value={`${numWithCommas(daysWaited)} days`} accent />
+                <MetaCell label={t.capsuleMetaWaited} value={t.capsuleMetaDaysAgo(daysWaited)} accent />
               </View>
               <View style={s.metaDividerH} />
               <View style={s.metaRow}>
-                <MetaCell label="you were" value={`${user.age} yrs old`} />
+                <MetaCell label={t.capsuleMetaYouWere} value={t.capsuleMetaYrsOld(user.age)} />
                 <View style={s.metaDividerV} />
-                <MetaCell label="days then" value={numWithCommas(daysRemainingThen)} />
+                <MetaCell label={t.capsuleMetaDaysThen} value={numWithCommas(daysRemainingThen)} />
               </View>
             </View>
 
             {/* Letter body */}
             <View style={s.letterBody}>
-              <Text style={s.letterGreeting}>Dear future me,</Text>
+              <Text style={s.letterGreeting}>{t.dearFutureMe}</Text>
 
               {/* Word-by-word reveal */}
               {letterReady && (
@@ -298,20 +302,20 @@ export default function CapsuleDetailModal({ capsule, user, visible, onClose, on
               )}
 
               <Text style={s.letterSignoff}>
-                {'\n'}— me, {daysWaited === 1 ? '1 day' : `${numWithCommas(daysWaited)} days`} ago
+                {'\n'}— {t.capsuleMetaDaysAgo(daysWaited)}
               </Text>
             </View>
 
             {/* Actions */}
             <View style={s.actions}>
               <TouchableOpacity style={s.actionGhost} onPress={onClose}>
-                <Text style={s.actionGhostText}>Keep on shelf</Text>
+                <Text style={s.actionGhostText}>{t.capsuleKeepOnShelf}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={s.actionBurn}
                 onPress={() => setPhase('confirm-burn')}
               >
-                <Text style={s.actionBurnText}>Burn the letter</Text>
+                <Text style={s.actionBurnText}>{t.capsuleBurnLetter}</Text>
               </TouchableOpacity>
             </View>
           </ScrollView>
@@ -320,16 +324,14 @@ export default function CapsuleDetailModal({ capsule, user, visible, onClose, on
       {/* ── Confirm burn ─────────────────────────────────────────────────────── */}
       {phase === 'confirm-burn' && (
         <View style={[StyleSheet.absoluteFill, { backgroundColor: DARK, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 36 }]}>
-          <Text style={s.burnTitle}>Burn this letter?</Text>
-          <Text style={s.burnBody}>
-            It will be gone forever.{'\n'}No going back.
-          </Text>
+          <Text style={s.burnTitle}>{t.capsuleBurnTitle}</Text>
+          <Text style={s.burnBody}>{t.capsuleBurnBody}</Text>
           <View style={s.burnActions}>
             <TouchableOpacity style={s.burnCancel} onPress={() => setPhase('letter')}>
-              <Text style={s.burnCancelText}>Cancel</Text>
+              <Text style={s.burnCancelText}>{t.capsuleBurnCancel}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={s.burnConfirm} onPress={() => onBurn(capsule!.id)}>
-              <Text style={s.burnConfirmText}>Burn it</Text>
+              <Text style={s.burnConfirmText}>{t.capsuleBurnConfirm}</Text>
             </TouchableOpacity>
           </View>
         </View>

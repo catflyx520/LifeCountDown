@@ -116,7 +116,7 @@ export default function CapsuleScreen() {
                 keyboardType="number-pad"
                 style={[styles.customInput, customYears !== '' && styles.customInputActive]}
               />
-              <MonoText style={styles.customUnitLabel}>{lang === 'zh' ? '年' : 'yr'}</MonoText>
+              <MonoText style={styles.customUnitLabel}>{s.customDaysUnit.year}</MonoText>
             </View>
             <View style={styles.customUnit}>
               <TextInput
@@ -127,7 +127,7 @@ export default function CapsuleScreen() {
                 keyboardType="number-pad"
                 style={[styles.customInput, customMonths !== '' && styles.customInputActive]}
               />
-              <MonoText style={styles.customUnitLabel}>{lang === 'zh' ? '月' : 'mo'}</MonoText>
+              <MonoText style={styles.customUnitLabel}>{s.customDaysUnit.month}</MonoText>
             </View>
             <View style={styles.customUnit}>
               <TextInput
@@ -138,7 +138,7 @@ export default function CapsuleScreen() {
                 keyboardType="number-pad"
                 style={[styles.customInput, customDaysInput !== '' && styles.customInputActive]}
               />
-              <MonoText style={styles.customUnitLabel}>{lang === 'zh' ? '天' : 'd'}</MonoText>
+              <MonoText style={styles.customUnitLabel}>{s.customDaysUnit.day}</MonoText>
             </View>
           </View>
         </View>
