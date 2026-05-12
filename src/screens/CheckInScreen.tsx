@@ -1,6 +1,6 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, TextInput, StyleSheet,
+  View, Text, ScrollView, TouchableOpacity, TextInput, StyleSheet, Animated, Easing,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -84,6 +84,76 @@ function makeStarPath(jitter: number, seed: number): string {
 }
 const STAR_PATHS = [1, 2, 3, 4, 5].map(i => makeStarPath(0.9, i));
 const STAR_ROTS = [1, 2, 3, 4, 5].map(i => ((i * 7) % 5) - 2);
+
+// ---- Constellation rating ----
+function ConstellationRating({ rating, onChange }: { rating: number; onChange: (r: number) => void }) {
+  const [containerWidth, setContainerWidth] = useState(0);
+  const animFill = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (!containerWidth) return;
+    const targetWidth = rating > 0 ? ((rating - 1) / 4) * containerWidth * 0.80 : 0;
+    Animated.timing(animFill, {
+      toValue: targetWidth,
+      duration: 320,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: false,
+    }).start();
+  }, [rating, containerWidth]);
+
+  const LINE_TOP = 8;
+
+  return (
+    <View
+      onLayout={e => setContainerWidth(e.nativeEvent.layout.width)}
+      style={{ paddingTop: LINE_TOP + 16 }}
+    >
+      {/* background line — above the stars */}
+      <View style={{
+        position: 'absolute', top: LINE_TOP, left: 0, right: 0,
+        height: 1, backgroundColor: theme.border,
+      }} />
+      {/* animated fill line */}
+      {containerWidth > 0 && (
+        <Animated.View style={{
+          position: 'absolute', top: LINE_TOP,
+          left: containerWidth * 0.10,
+          width: animFill,
+          height: 1, backgroundColor: theme.accent,
+        }} />
+      )}
+      {/* stars row */}
+      <View style={{ flexDirection: 'row' }}>
+        {[1, 2, 3, 4, 5].map(n => {
+          const on = n <= rating;
+          return (
+            <TouchableOpacity
+              key={n}
+              onPress={() => onChange(n)}
+              style={{ flex: 1, alignItems: 'center', paddingVertical: 4 }}
+              activeOpacity={0.75}
+            >
+              <Svg
+                width={34} height={34} viewBox="0 0 56 56"
+                style={{ transform: [{ rotate: `${STAR_ROTS[n - 1]}deg` }] }}
+              >
+                <Path
+                  d={STAR_PATHS[n - 1]}
+                  stroke={on ? theme.accent : theme.border}
+                  strokeWidth="1.6"
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                  fill={on ? theme.accent : 'transparent'}
+                  fillOpacity={on ? 0.9 : 0}
+                />
+              </Svg>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
 
 function toDateStr(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -253,12 +323,15 @@ export default function CheckInScreen() {
                     ]}>
                       {day}
                     </Text>
-                    {/* 打卡圆点 */}
-                    <View style={styles.capsuleDotRow}>
-                      {entry && <View style={styles.checkinDot} />}
-                      {hasCreated && <View style={styles.capsuleDotCreated} />}
-                      {hasUnlock && <View style={styles.capsuleDotUnlock} />}
-                    </View>
+                    <Text style={styles.dayEmoji}>
+                      {entry ? (s.moods.find(m => m.key === entry.mood)?.emoji ?? '') : ''}
+                    </Text>
+                    {(hasCreated || hasUnlock) && (
+                      <View style={styles.capsuleDotRow}>
+                        {hasCreated && <View style={styles.capsuleDotCreated} />}
+                        {hasUnlock && <View style={styles.capsuleDotUnlock} />}
+                      </View>
+                    )}
                   </View>
                 </TouchableOpacity>
               );
@@ -268,10 +341,6 @@ export default function CheckInScreen() {
 
         {/* 图例 */}
         <View style={styles.legend}>
-          <View style={styles.legendItem}>
-            <View style={styles.checkinDot} />
-            <MonoText style={styles.legendText}>{zh ? '已打卡' : 'checked in'}</MonoText>
-          </View>
           <View style={styles.legendItem}>
             <View style={styles.capsuleDotCreated} />
             <MonoText style={styles.legendText}>{zh ? '写信日' : 'written'}</MonoText>
@@ -460,45 +529,10 @@ export default function CheckInScreen() {
 
             {/* Rating — constellation */}
             <Eyebrow style={{ marginTop: 18, marginBottom: 10, fontSize: 9 }}>{s.ratingLabel}</Eyebrow>
-            <View style={styles.constellWrap}>
-              {/* background line */}
-              <View style={styles.constellBg} />
-              {/* filled line */}
-              {draft.rating > 0 && (
-                <View style={[
-                  styles.constellFill,
-                  { width: `${((draft.rating - 1) / 4) * 80 + 10}%` as any },
-                ]} />
-              )}
-              <View style={styles.starsRow}>
-                {[1, 2, 3, 4, 5].map(n => {
-                  const on = n <= draft.rating;
-                  return (
-                    <TouchableOpacity
-                      key={n}
-                      onPress={() => { setDraft(d => ({ ...d, rating: n })); setJustSaved(false); }}
-                      style={styles.starBtn}
-                      activeOpacity={0.75}
-                    >
-                      <Svg
-                        width={34} height={34} viewBox="0 0 56 56"
-                        style={{ transform: [{ rotate: `${STAR_ROTS[n - 1]}deg` }] }}
-                      >
-                        <Path
-                          d={STAR_PATHS[n - 1]}
-                          stroke={on ? theme.accent : theme.border}
-                          strokeWidth="1.6"
-                          strokeLinejoin="round"
-                          strokeLinecap="round"
-                          fill={on ? theme.accent : 'transparent'}
-                          fillOpacity={on ? 0.9 : 0}
-                        />
-                      </Svg>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            </View>
+            <ConstellationRating
+              rating={draft.rating}
+              onChange={r => { setDraft(d => ({ ...d, rating: r })); setJustSaved(false); }}
+            />
 
             {/* Intention */}
             <Eyebrow style={{ marginTop: 16, marginBottom: 8, fontSize: 9 }}>{s.intentionLabel}</Eyebrow>
@@ -554,7 +588,7 @@ const styles = StyleSheet.create({
   },
   dayNum: { fontFamily: fonts.mono, fontSize: 10, color: theme.fg },
 
-  checkinDot: { width: 4, height: 4, borderRadius: 2, backgroundColor: theme.fg },
+  dayEmoji: { fontSize: 11, lineHeight: 13 },
   capsuleDotRow: { flexDirection: 'row', gap: 2, marginTop: 1 },
   capsuleDotCreated: { width: 4, height: 4, borderRadius: 2, backgroundColor: theme.accent },
   capsuleDotUnlock: { width: 4, height: 4, borderRadius: 2, backgroundColor: 'transparent', borderWidth: 1, borderColor: theme.accent },
@@ -613,17 +647,6 @@ const styles = StyleSheet.create({
   moodLabel: { fontFamily: fonts.mono, fontSize: 8, letterSpacing: 1.5, color: theme.muted, textTransform: 'uppercase' },
   moodLabelActive: { color: theme.accent },
 
-  constellWrap: { position: 'relative' },
-  constellBg: {
-    position: 'absolute', left: '10%', right: '10%', top: 17,
-    height: 1, backgroundColor: theme.border,
-  },
-  constellFill: {
-    position: 'absolute', left: '10%', top: 17,
-    height: 1, backgroundColor: theme.accent,
-  },
-  starsRow: { flexDirection: 'row' },
-  starBtn: { flex: 1, alignItems: 'center', paddingVertical: 4 },
 
   intentionInput: {
     fontFamily: fonts.body, fontSize: 14, color: theme.fg,
