@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, ActivityIndicator, Text } from 'react-native';
@@ -7,6 +7,8 @@ import { theme, fonts } from '../theme';
 import { loadUser } from '../storage';
 import { RootStackParamList, MainTabParamList } from '../types';
 import { useT } from '../i18n';
+
+export const navigationRef = createNavigationContainerRef<RootStackParamList>();
 
 import OnboardingScreen from '../screens/OnboardingScreen';
 import AgeScreen from '../screens/AgeScreen';
@@ -100,7 +102,7 @@ export default function Navigation() {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={initialRoute}>
         <Stack.Screen name="Onboarding" component={OnboardingScreen} />
         <Stack.Screen name="Age" component={AgeScreen} />

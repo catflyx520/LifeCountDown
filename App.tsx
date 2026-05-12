@@ -12,7 +12,8 @@ import {
 } from '@expo-google-fonts/jetbrains-mono';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import Navigation from './src/navigation';
+import * as Notifications from 'expo-notifications';
+import Navigation, { navigationRef } from './src/navigation';
 import { LanguageProvider } from './src/i18n';
 import AppSplash from './src/components/AppSplash';
 import { rescheduleIfEnabled } from './src/notifications';
@@ -29,6 +30,15 @@ export default function App() {
 
   const [splashVisible, setSplashVisible] = useState(true);
   const splashOpacity = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const sub = Notifications.addNotificationResponseReceivedListener(() => {
+      if (navigationRef.isReady()) {
+        (navigationRef as any).navigate('Main', { screen: 'CheckIn' });
+      }
+    });
+    return () => sub.remove();
+  }, []);
 
   useEffect(() => {
     if (!fontsLoaded) return;
