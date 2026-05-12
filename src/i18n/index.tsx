@@ -263,8 +263,8 @@ const en = {
   checkInTitle: 'Check-in',
   streakLabel: (n: number) => `${n} day streak`,
   moods: [
-    { key: 'calm',    emoji: '😌', label: 'still'   },
     { key: 'happy',   emoji: '😊', label: 'open'    },
+    { key: 'calm',    emoji: '😌', label: 'still'   },
     { key: 'neutral', emoji: '😐', label: 'flat'    },
     { key: 'anxious', emoji: '😟', label: 'held'    },
     { key: 'drained', emoji: '😩', label: 'drained' },
@@ -526,8 +526,8 @@ const zh: typeof en = {
   checkInTitle: '每日打卡',
   streakLabel: (n: number) => `连续 ${n} 天`,
   moods: [
-    { key: 'calm',    emoji: '😌', label: '平静'   },
     { key: 'happy',   emoji: '😊', label: '开心'   },
+    { key: 'calm',    emoji: '😌', label: '平静'   },
     { key: 'neutral', emoji: '😐', label: '平淡'   },
     { key: 'anxious', emoji: '😟', label: '焦虑'   },
     { key: 'drained', emoji: '😩', label: '疲惫'   },
