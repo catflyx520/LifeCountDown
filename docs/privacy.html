@@ -1,243 +1,80 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Privacy Policy — Life Counter</title>
-  <style>
-    :root {
-      --bg: #eadfc3;
-      --surface: #f5ecd6;
-      --fg: #3a2e1e;
-      --muted: #8a7a66;
-      --accent: #b5533c;
-      --border: #d9ccb0;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background: #1c1c1c;
-      display: flex;
-      justify-content: center;
-      padding: 40px 16px 80px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    }
-    .card {
-      background: var(--bg);
-      color: var(--fg);
-      max-width: 680px;
-      width: 100%;
-      border-radius: 20px;
-      padding: 48px 40px;
-    }
-    .mono {
-      font-family: 'JetBrains Mono', 'Courier New', monospace;
-      font-size: 11px;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-    h1 {
-      font-family: Georgia, 'Times New Roman', serif;
-      font-size: 32px;
-      font-weight: 400;
-      margin: 12px 0 4px;
-      line-height: 1.2;
-    }
-    .updated {
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 36px;
-    }
-    .lang-switch {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 32px;
-    }
-    .lang-switch button {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      padding: 6px 14px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--muted);
-      cursor: pointer;
-    }
-    .lang-switch button.active {
-      background: var(--accent);
-      color: #f5ecd6;
-      border-color: var(--accent);
-    }
-    section { margin-bottom: 28px; }
-    h2 {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 10px;
-    }
-    p { font-size: 15px; line-height: 1.7; color: var(--fg); margin-bottom: 10px; }
-    ul { padding-left: 20px; margin-bottom: 10px; }
-    li { font-size: 15px; line-height: 1.7; color: var(--fg); margin-bottom: 4px; }
-    a { color: var(--accent); }
-    .divider { height: 1px; background: var(--border); margin: 32px 0; }
-    [data-lang] { display: none; }
-    [data-lang].visible { display: block; }
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Privacy Policy · Life Counter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --bg:#eadfc3; --surface:#f5ecd6; --fg:#3a2e1e; --muted:rgba(58,46,30,0.55); --border:rgba(58,46,30,0.15); --accent:#b5533c; --accent-fg:#f5ecd6; }
+  html,body { background:var(--bg); color:var(--fg); font-family:'Inter',system-ui,sans-serif; -webkit-font-smoothing:antialiased; min-height:100%; }
+  .page { max-width:640px; margin:0 auto; padding:48px 24px 80px; }
+  .topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:40px; }
+  .monogram { font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.2em; color:var(--accent-fg); background:var(--accent); padding:4px 10px; border-radius:4px; }
+  .lang-toggle { display:flex; gap:6px; }
+  .lang-btn { font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.15em; padding:5px 12px; border-radius:8px; border:1px solid var(--border); background:transparent; color:var(--muted); cursor:pointer; text-transform:uppercase; transition:all 0.15s; }
+  .lang-btn.active { background:var(--accent); border-color:var(--accent); color:var(--accent-fg); }
+  .eyebrow { font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.22em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+  h1 { font-family:'Instrument Serif',serif; font-size:36px; font-weight:400; line-height:1.15; color:var(--fg); margin-bottom:10px; }
+  .updated { font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.2em; color:var(--muted); margin-bottom:24px; text-transform:uppercase; }
+  hr { border:none; border-top:1px solid var(--border); margin-bottom:32px; }
+  .section { margin-bottom:28px; }
+  .section-title { font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:var(--accent); margin-bottom:10px; }
+  .section-body { font-size:15px; line-height:1.7; color:var(--muted); }
+  .section-body a { color:var(--accent); }
+  .footer { margin-top:48px; padding-top:24px; border-top:1px solid var(--border); font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.18em; color:var(--muted); text-transform:uppercase; text-align:center; }
+  [lang-content] { display:none; }
+  [lang-content].visible { display:block; }
+</style>
 </head>
 <body>
-<div class="card">
-  <p class="mono">L/C · Life Counter</p>
-  <h1>Privacy Policy</h1>
-  <p class="updated">Last updated: May 2025</p>
-
-  <div class="lang-switch">
-    <button class="active" onclick="setLang('en')">English</button>
-    <button onclick="setLang('zh')">中文</button>
+<div class="page">
+  <div class="topbar">
+    <span class="monogram">L/C</span>
+    <div class="lang-toggle">
+      <button class="lang-btn active" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" onclick="setLang('zh')">中文</button>
+    </div>
   </div>
 
-  <!-- ENGLISH -->
-  <div data-lang="en" class="visible">
-
-    <section>
-      <h2>Overview</h2>
-      <p>Life Counter ("we", "the app") is a personal life-awareness tool. We take your privacy seriously. This policy explains what data is collected, where it lives, and what we share with third parties.</p>
-    </section>
-
-    <section>
-      <h2>Data stored on your device</h2>
-      <p>The following information is stored locally on your device using on-device storage (AsyncStorage). It is never uploaded to our servers.</p>
-      <ul>
-        <li>Your name (optional)</li>
-        <li>Your age or date of birth</li>
-        <li>Your target lifespan age</li>
-        <li>Time Capsule messages you write to your future self</li>
-        <li>Notification preferences (on/off, time of day)</li>
-        <li>App language preference</li>
-      </ul>
-    </section>
-
-    <section>
-      <h2>Data sent to third parties</h2>
-      <p><strong>Google Gemini API</strong> — If you choose the "AI Estimate" mode during setup, your responses to lifestyle questions (sleep, exercise, diet, stress, etc.) and any optional medical conditions you enter are sent to Google's Gemini API to generate a lifespan estimate. This data is processed by Google and subject to <a href="https://policies.google.com/privacy" target="_blank">Google's Privacy Policy</a>. This feature is optional; you may choose "Set it yourself" instead.</p>
-      <p><strong>Firebase (Google)</strong> — The app fetches publicly available quotes and historical figure data from Firebase Firestore. No personal data is sent to Firebase.</p>
-    </section>
-
-    <section>
-      <h2>What we do not collect</h2>
-      <ul>
-        <li>We do not collect analytics or usage data</li>
-        <li>We do not serve ads</li>
-        <li>We do not create user accounts</li>
-        <li>We do not track your location</li>
-        <li>We do not share your data with any party other than those listed above</li>
-      </ul>
-    </section>
-
-    <section>
-      <h2>Notifications</h2>
-      <p>If you enable daily reminders, notifications are scheduled locally on your device. No data is transmitted to send these notifications.</p>
-    </section>
-
-    <section>
-      <h2>Data deletion</h2>
-      <p>All locally stored data can be permanently deleted at any time via <strong>Settings → Reset all data</strong>. This action is irreversible.</p>
-    </section>
-
-    <section>
-      <h2>Children's privacy</h2>
-      <p>Life Counter is not directed at children under 13. We do not knowingly collect information from children.</p>
-    </section>
-
-    <section>
-      <h2>Changes to this policy</h2>
-      <p>We may update this policy. The "Last updated" date at the top reflects the most recent revision. Continued use of the app constitutes acceptance of the updated policy.</p>
-    </section>
-
-    <section>
-      <h2>Contact</h2>
-      <p>Questions about this policy? Email us at <a href="mailto:painewu@gmail.com">painewu@gmail.com</a></p>
-    </section>
-
+  <div lang-content="en" class="visible">
+    <div class="eyebrow">L/C · Privacy Policy</div>
+    <h1>Your data.<br>Yours alone.</h1>
+    <div class="updated">Last updated May 2026</div>
+    <hr>
+    <div class="section"><div class="section-title">Data Collection</div><div class="section-body">Life Counter collects no personal information. We do not track you, profile you, or transmit your data to any third party.</div></div>
+    <div class="section"><div class="section-title">Local Storage</div><div class="section-body">Everything you enter in the app — your age, name, check-ins, time capsules — is stored locally on your device using AsyncStorage. None of it leaves your device.</div></div>
+    <div class="section"><div class="section-title">Firebase / Firestore</div><div class="section-body">The app uses Firebase Firestore to fetch community content (quotes, historical figures). This is read-only public data. Your personal information is never written to Firestore.</div></div>
+    <div class="section"><div class="section-title">Notifications</div><div class="section-body">If you enable daily reminders, notifications are generated entirely on-device. No external service is involved.</div></div>
+    <div class="section"><div class="section-title">Home Screen Widgets</div><div class="section-body">Widgets read your data directly from local storage. No network requests are made.</div></div>
+    <div class="section"><div class="section-title">Contact</div><div class="section-body">Questions? Reach us via GitHub Issues: <a href="https://github.com/catflyx520/LifeCountDown/issues">github.com/catflyx520/LifeCountDown</a></div></div>
   </div>
 
-  <!-- CHINESE -->
-  <div data-lang="zh">
-
-    <section>
-      <h2>概述</h2>
-      <p>Life Counter（"我们"、"本应用"）是一款个人生命感知工具。我们重视您的隐私。本政策说明收集哪些数据、数据存储在哪里，以及我们与第三方共享的内容。</p>
-    </section>
-
-    <section>
-      <h2>存储在您设备上的数据</h2>
-      <p>以下信息使用设备本地存储（AsyncStorage）保存在您的设备上，不会上传至我们的服务器。</p>
-      <ul>
-        <li>您的姓名（可选）</li>
-        <li>您的年龄或出生日期</li>
-        <li>您设定的目标寿命年龄</li>
-        <li>您写给未来自己的时间胶囊内容</li>
-        <li>通知偏好设置（开/关、提醒时间）</li>
-        <li>应用语言偏好</li>
-      </ul>
-    </section>
-
-    <section>
-      <h2>发送给第三方的数据</h2>
-      <p><strong>Google Gemini API</strong> — 如果您在设置过程中选择"AI 估算"模式，您对生活习惯问卷（睡眠、运动、饮食、压力等）的回答，以及您可选填写的现有病症信息，将被发送至 Google 的 Gemini API 以生成寿命估算。该数据由 Google 处理，受 <a href="https://policies.google.com/privacy" target="_blank">Google 隐私政策</a>约束。此功能为可选项，您可选择"手动设定"替代。</p>
-      <p><strong>Firebase（Google）</strong> — 本应用从 Firebase Firestore 获取公开可用的名言和历史人物数据。不会向 Firebase 发送任何个人数据。</p>
-    </section>
-
-    <section>
-      <h2>我们不收集的内容</h2>
-      <ul>
-        <li>不收集分析数据或使用数据</li>
-        <li>不展示广告</li>
-        <li>不创建用户账号</li>
-        <li>不追踪您的位置</li>
-        <li>不向上述以外的任何方分享您的数据</li>
-      </ul>
-    </section>
-
-    <section>
-      <h2>通知</h2>
-      <p>如果您开启每日提醒，通知将在您的设备本地调度。发送这些通知不会传输任何数据。</p>
-    </section>
-
-    <section>
-      <h2>数据删除</h2>
-      <p>所有本地存储的数据均可随时通过 <strong>设置 → 重置所有数据</strong> 永久删除。此操作不可撤销。</p>
-    </section>
-
-    <section>
-      <h2>儿童隐私</h2>
-      <p>Life Counter 不面向 13 岁以下儿童。我们不会主动收集儿童的信息。</p>
-    </section>
-
-    <section>
-      <h2>政策变更</h2>
-      <p>我们可能会更新本政策。顶部的"最后更新"日期反映最新修订。继续使用本应用即表示您接受更新后的政策。</p>
-    </section>
-
-    <section>
-      <h2>联系方式</h2>
-      <p>对本政策有疑问？请发送邮件至 <a href="mailto:painewu@gmail.com">painewu@gmail.com</a></p>
-    </section>
-
+  <div lang-content="zh">
+    <div class="eyebrow">L/C · 隐私政策</div>
+    <h1>你的数据，<br>只属于你。</h1>
+    <div class="updated">最后更新 2026 年 5 月</div>
+    <hr>
+    <div class="section"><div class="section-title">数据收集</div><div class="section-body">Life Counter 不收集任何个人信息。我们不追踪你，不分析你，也不向任何第三方传输你的数据。</div></div>
+    <div class="section"><div class="section-title">本地存储</div><div class="section-body">你在 App 中输入的所有内容——年龄、姓名、打卡记录、时光胶囊——全部储存在你自己设备上的本地空间（AsyncStorage）。这些数据不会上传到任何服务器。</div></div>
+    <div class="section"><div class="section-title">Firebase / Firestore</div><div class="section-body">App 使用 Firebase Firestore 读取社区内容（名言、历史人物）。这些是只读的公开数据，你的个人信息不会写入 Firestore。</div></div>
+    <div class="section"><div class="section-title">通知</div><div class="section-body">如果你开启了每日提醒，通知完全在设备本地生成，不经过任何外部服务。</div></div>
+    <div class="section"><div class="section-title">主屏幕小组件</div><div class="section-body">小组件直接从本地读取你的数据，无任何网络请求。</div></div>
+    <div class="section"><div class="section-title">联系我们</div><div class="section-body">如有疑问，请通过 GitHub Issues 联系我们：<a href="https://github.com/catflyx520/LifeCountDown/issues">github.com/catflyx520/LifeCountDown</a></div></div>
   </div>
 
+  <div class="footer">Life Counter · L/C · v1.0.0</div>
 </div>
-
 <script>
   function setLang(lang) {
-    document.querySelectorAll('[data-lang]').forEach(el => {
-      el.classList.toggle('visible', el.dataset.lang === lang);
+    document.querySelectorAll('[lang-content]').forEach(el => {
+      el.classList.toggle('visible', el.getAttribute('lang-content') === lang);
     });
-    document.querySelectorAll('.lang-switch button').forEach((btn, i) => {
-      btn.classList.toggle('active', (i === 0 && lang === 'en') || (i === 1 && lang === 'zh'));
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.textContent.trim().toLowerCase() === lang || (lang === 'zh' && btn.textContent.trim() === '中文'));
     });
   }
 </script>
