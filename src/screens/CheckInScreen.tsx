@@ -4,11 +4,86 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import Svg, { Circle, Path, Line as SvgLine } from 'react-native-svg';
 import { Eyebrow, Card, MonoText } from '../components/UI';
 import { theme, fonts } from '../theme';
 import { loadUser, saveUser } from '../storage';
 import { CheckIn, Capsule } from '../types';
 import { useT } from '../i18n';
+
+// ---- SVG face ----
+function MoodFace({ moodKey, color, size = 48 }: { moodKey: string; color: string; size?: number }) {
+  const sw = '1.5';
+  const cap = 'round' as const;
+  const fill = 'none' as const;
+  const faces: Record<string, React.ReactElement> = {
+    calm: (
+      <Svg width={size} height={size} viewBox="0 0 56 56">
+        <Circle cx="28" cy="28" r="24" stroke={color} strokeWidth={sw} fill={fill} />
+        <Path d="M17 24 q3 -3 6 0" stroke={color} strokeWidth={sw} strokeLinecap={cap} fill={fill} />
+        <Path d="M33 24 q3 -3 6 0" stroke={color} strokeWidth={sw} strokeLinecap={cap} fill={fill} />
+        <Path d="M19 35 q9 5 18 0" stroke={color} strokeWidth={sw} strokeLinecap={cap} fill={fill} />
+      </Svg>
+    ),
+    happy: (
+      <Svg width={size} height={size} viewBox="0 0 56 56">
+        <Circle cx="28" cy="28" r="24" stroke={color} strokeWidth={sw} fill={fill} />
+        <Circle cx="20" cy="24" r="1.5" fill={color} />
+        <Circle cx="36" cy="24" r="1.5" fill={color} />
+        <Path d="M17 33 q11 9 22 0" stroke={color} strokeWidth={sw} strokeLinecap={cap} fill={fill} />
+        <Path d="M17 33 q-1 -2 1 -3" stroke={color} strokeWidth={sw} strokeLinecap={cap} fill={fill} />
+        <Path d="M39 33 q1 -2 -1 -3" stroke={color} strokeWidth={sw} strokeLinecap={cap} fill={fill} />
+      </Svg>
+    ),
+    neutral: (
+      <Svg width={size} height={size} viewBox="0 0 56 56">
+        <Circle cx="28" cy="28" r="24" stroke={color} strokeWidth={sw} fill={fill} />
+        <SvgLine x1="17" y1="24" x2="23" y2="24" stroke={color} strokeWidth={sw} strokeLinecap={cap} />
+        <SvgLine x1="33" y1="24" x2="39" y2="24" stroke={color} strokeWidth={sw} strokeLinecap={cap} />
+        <SvgLine x1="20" y1="36" x2="36" y2="36" stroke={color} strokeWidth={sw} strokeLinecap={cap} />
+      </Svg>
+    ),
+    anxious: (
+      <Svg width={size} height={size} viewBox="0 0 56 56">
+        <Circle cx="28" cy="28" r="24" stroke={color} strokeWidth={sw} fill={fill} />
+        <Path d="M16 19 q3 -2 7 0" stroke={color} strokeWidth={sw} strokeLinecap={cap} fill={fill} />
+        <Path d="M33 19 q3 -2 7 0" stroke={color} strokeWidth={sw} strokeLinecap={cap} fill={fill} />
+        <Circle cx="20" cy="25" r="1.2" fill={color} />
+        <Circle cx="36" cy="25" r="1.2" fill={color} />
+        <Path d="M19 36 q4 -2 9 -1 q5 1 9 -1" stroke={color} strokeWidth={sw} strokeLinecap={cap} fill={fill} />
+      </Svg>
+    ),
+    drained: (
+      <Svg width={size} height={size} viewBox="0 0 56 56">
+        <Circle cx="28" cy="28" r="24" stroke={color} strokeWidth={sw} fill={fill} />
+        <Path d="M16 25 q3 -3 7 0" stroke={color} strokeWidth={sw} strokeLinecap={cap} fill={fill} />
+        <Path d="M33 25 q3 -3 7 0" stroke={color} strokeWidth={sw} strokeLinecap={cap} fill={fill} />
+        <SvgLine x1="17" y1="25" x2="23" y2="25" stroke={color} strokeWidth={sw} strokeLinecap={cap} />
+        <SvgLine x1="33" y1="25" x2="39" y2="25" stroke={color} strokeWidth={sw} strokeLinecap={cap} />
+        <Path d="M19 38 q9 -6 18 0" stroke={color} strokeWidth={sw} strokeLinecap={cap} fill={fill} />
+      </Svg>
+    ),
+  };
+  return faces[moodKey] ?? null;
+}
+
+// ---- Star path (hand-drawn jitter) ----
+function makeStarPath(jitter: number, seed: number): string {
+  const cx = 28, cy = 28, R = 22, r = 9;
+  let s = seed * 9301 + 49297;
+  const rand = () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
+  const pts: string[] = [];
+  for (let i = 0; i < 10; i++) {
+    const angle = -Math.PI / 2 + (i * Math.PI / 5);
+    const radius = i % 2 === 0 ? R : r;
+    const jx = (rand() - 0.5) * 2 * jitter;
+    const jy = (rand() - 0.5) * 2 * jitter;
+    pts.push(`${(cx + Math.cos(angle) * radius + jx).toFixed(2)} ${(cy + Math.sin(angle) * radius + jy).toFixed(2)}`);
+  }
+  return 'M ' + pts.join(' L ') + ' Z';
+}
+const STAR_PATHS = [1, 2, 3, 4, 5].map(i => makeStarPath(0.9, i));
+const STAR_ROTS = [1, 2, 3, 4, 5].map(i => ((i * 7) % 5) - 2);
 
 function toDateStr(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -160,7 +235,6 @@ export default function CheckInScreen() {
               if (day === null) return <View key={dow} style={styles.dayCell} />;
               const iso = `${view.y}-${String(view.m + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
               const entry = entryFor(iso);
-              const mood = entry ? s.moods.find(m => m.key === entry.mood) : null;
               const isSel = iso === selectedDate;
               const isTod = iso === todayStr;
               const hasCreated = capsuleCreatedDates.has(iso);
@@ -179,14 +253,12 @@ export default function CheckInScreen() {
                     ]}>
                       {day}
                     </Text>
-                    <Text style={styles.dayEmoji}>{mood ? mood.emoji : ''}</Text>
-                    {/* 胶囊指示点 */}
-                    {(hasCreated || hasUnlock) && (
-                      <View style={styles.capsuleDotRow}>
-                        {hasCreated && <View style={styles.capsuleDotCreated} />}
-                        {hasUnlock && <View style={styles.capsuleDotUnlock} />}
-                      </View>
-                    )}
+                    {/* 打卡圆点 */}
+                    <View style={styles.capsuleDotRow}>
+                      {entry && <View style={styles.checkinDot} />}
+                      {hasCreated && <View style={styles.capsuleDotCreated} />}
+                      {hasUnlock && <View style={styles.capsuleDotUnlock} />}
+                    </View>
                   </View>
                 </TouchableOpacity>
               );
@@ -196,6 +268,10 @@ export default function CheckInScreen() {
 
         {/* 图例 */}
         <View style={styles.legend}>
+          <View style={styles.legendItem}>
+            <View style={styles.checkinDot} />
+            <MonoText style={styles.legendText}>{zh ? '已打卡' : 'checked in'}</MonoText>
+          </View>
           <View style={styles.legendItem}>
             <View style={styles.capsuleDotCreated} />
             <MonoText style={styles.legendText}>{zh ? '写信日' : 'written'}</MonoText>
@@ -297,14 +373,29 @@ export default function CheckInScreen() {
             {/* 只读展示已有打卡 */}
             {existing && (
               <View style={styles.readonlyEntry}>
-                <Text style={styles.readonlyMood}>
-                  {s.moods.find(m => m.key === existing.mood)?.emoji ?? ''}
-                </Text>
-                {existing.rating > 0 && (
-                  <Text style={styles.readonlyStars}>
-                    {'★'.repeat(existing.rating)}{'☆'.repeat(5 - existing.rating)}
-                  </Text>
-                )}
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                  <MoodFace moodKey={existing.mood} color={theme.muted} size={36} />
+                  <MonoText style={{ fontSize: 9, color: theme.muted, letterSpacing: 1.5 }}>
+                    {s.moods.find(m => m.key === existing.mood)?.label ?? existing.mood}
+                  </MonoText>
+                  {existing.rating > 0 && (
+                    <View style={{ flexDirection: 'row', gap: 2, marginLeft: 4 }}>
+                      {[1,2,3,4,5].map(n => (
+                        <Svg key={n} width={14} height={14} viewBox="0 0 56 56"
+                          style={{ transform: [{ rotate: `${STAR_ROTS[n-1]}deg` }] }}>
+                          <Path
+                            d={STAR_PATHS[n-1]}
+                            stroke={n <= existing.rating ? theme.accent : theme.border}
+                            strokeWidth="2"
+                            strokeLinejoin="round"
+                            fill={n <= existing.rating ? theme.accent : 'transparent'}
+                            fillOpacity={n <= existing.rating ? 0.9 : 0}
+                          />
+                        </Svg>
+                      ))}
+                    </View>
+                  )}
+                </View>
                 {existing.intention ? (
                   <Text style={styles.readonlyIntention}>{existing.intention}</Text>
                 ) : null}
@@ -314,7 +405,7 @@ export default function CheckInScreen() {
             {/* 胶囊引导 */}
             <TouchableOpacity
               style={styles.capsulePrompt}
-              onPress={() => navigation.navigate('Capsule')}
+              onPress={() => navigation.navigate('Capsule', { unlockDate: selectedDate } as any)}
               activeOpacity={0.8}
             >
               <Text style={styles.capsulePromptIcon}>◉</Text>
@@ -343,31 +434,70 @@ export default function CheckInScreen() {
         ) : (
           <>
             {/* Mood */}
-            <Eyebrow style={{ marginBottom: 8, fontSize: 9 }}>{s.moodLabel}</Eyebrow>
+            <Eyebrow style={{ marginBottom: 10, fontSize: 9 }}>{s.moodLabel}</Eyebrow>
             <View style={styles.moodRow}>
-              {s.moods.map(m => (
-                <TouchableOpacity
-                  key={m.key}
-                  onPress={() => { setDraft(d => ({ ...d, mood: m.key })); setJustSaved(false); }}
-                  style={[styles.moodBtn, draft.mood === m.key && styles.moodBtnActive]}
-                >
-                  <Text style={styles.moodEmoji}>{m.emoji}</Text>
-                </TouchableOpacity>
-              ))}
+              {s.moods.map(m => {
+                const active = draft.mood === m.key;
+                return (
+                  <TouchableOpacity
+                    key={m.key}
+                    onPress={() => { setDraft(d => ({ ...d, mood: m.key })); setJustSaved(false); }}
+                    style={[styles.moodBtn, active && styles.moodBtnActive]}
+                    activeOpacity={0.75}
+                  >
+                    <MoodFace
+                      moodKey={m.key}
+                      color={active ? theme.accent : theme.muted}
+                      size={44}
+                    />
+                    <MonoText style={{ ...styles.moodLabel, ...(active ? styles.moodLabelActive : {}) }}>
+                      {m.label}
+                    </MonoText>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
 
-            {/* Rating */}
-            <Eyebrow style={{ marginTop: 16, marginBottom: 8, fontSize: 9 }}>{s.ratingLabel}</Eyebrow>
-            <View style={styles.starsRow}>
-              {[1, 2, 3, 4, 5].map(n => (
-                <TouchableOpacity
-                  key={n}
-                  onPress={() => { setDraft(d => ({ ...d, rating: n })); setJustSaved(false); }}
-                  style={styles.starBtn}
-                >
-                  <Text style={[styles.star, n <= draft.rating && styles.starActive]}>★</Text>
-                </TouchableOpacity>
-              ))}
+            {/* Rating — constellation */}
+            <Eyebrow style={{ marginTop: 18, marginBottom: 10, fontSize: 9 }}>{s.ratingLabel}</Eyebrow>
+            <View style={styles.constellWrap}>
+              {/* background line */}
+              <View style={styles.constellBg} />
+              {/* filled line */}
+              {draft.rating > 0 && (
+                <View style={[
+                  styles.constellFill,
+                  { width: `${((draft.rating - 1) / 4) * 80 + 10}%` as any },
+                ]} />
+              )}
+              <View style={styles.starsRow}>
+                {[1, 2, 3, 4, 5].map(n => {
+                  const on = n <= draft.rating;
+                  return (
+                    <TouchableOpacity
+                      key={n}
+                      onPress={() => { setDraft(d => ({ ...d, rating: n })); setJustSaved(false); }}
+                      style={styles.starBtn}
+                      activeOpacity={0.75}
+                    >
+                      <Svg
+                        width={34} height={34} viewBox="0 0 56 56"
+                        style={{ transform: [{ rotate: `${STAR_ROTS[n - 1]}deg` }] }}
+                      >
+                        <Path
+                          d={STAR_PATHS[n - 1]}
+                          stroke={on ? theme.accent : theme.border}
+                          strokeWidth="1.6"
+                          strokeLinejoin="round"
+                          strokeLinecap="round"
+                          fill={on ? theme.accent : 'transparent'}
+                          fillOpacity={on ? 0.9 : 0}
+                        />
+                      </Svg>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
             </View>
 
             {/* Intention */}
@@ -423,8 +553,8 @@ const styles = StyleSheet.create({
     borderColor: theme.accent, backgroundColor: 'rgba(181,83,60,0.08)',
   },
   dayNum: { fontFamily: fonts.mono, fontSize: 10, color: theme.fg },
-  dayEmoji: { fontSize: 11, lineHeight: 13 },
 
+  checkinDot: { width: 4, height: 4, borderRadius: 2, backgroundColor: theme.fg },
   capsuleDotRow: { flexDirection: 'row', gap: 2, marginTop: 1 },
   capsuleDotCreated: { width: 4, height: 4, borderRadius: 2, backgroundColor: theme.accent },
   capsuleDotUnlock: { width: 4, height: 4, borderRadius: 2, backgroundColor: 'transparent', borderWidth: 1, borderColor: theme.accent },
@@ -458,10 +588,8 @@ const styles = StyleSheet.create({
 
   readonlyEntry: {
     padding: 12, borderRadius: 10,
-    backgroundColor: theme.bg, marginBottom: 14, gap: 6,
+    backgroundColor: theme.bg, marginBottom: 14,
   },
-  readonlyMood: { fontSize: 26 },
-  readonlyStars: { fontFamily: fonts.mono, fontSize: 16, color: theme.accent, letterSpacing: 2 },
   readonlyIntention: { fontFamily: fonts.body, fontSize: 13, color: theme.fg, lineHeight: 19 },
 
   capsulePrompt: {
@@ -477,17 +605,25 @@ const styles = StyleSheet.create({
 
   moodRow: { flexDirection: 'row', gap: 6 },
   moodBtn: {
-    flex: 1, aspectRatio: 1, borderRadius: 12,
+    flex: 1, borderRadius: 12, paddingVertical: 10, paddingHorizontal: 4,
     borderWidth: 1, borderColor: theme.border,
-    alignItems: 'center', justifyContent: 'center',
+    alignItems: 'center', gap: 6,
   },
   moodBtnActive: { borderColor: theme.accent, backgroundColor: 'rgba(181,83,60,0.1)' },
-  moodEmoji: { fontSize: 24 },
+  moodLabel: { fontFamily: fonts.mono, fontSize: 8, letterSpacing: 1.5, color: theme.muted, textTransform: 'uppercase' },
+  moodLabelActive: { color: theme.accent },
 
-  starsRow: { flexDirection: 'row', gap: 8 },
-  starBtn: { padding: 2 },
-  star: { fontFamily: fonts.mono, fontSize: 28, color: theme.border },
-  starActive: { color: theme.accent },
+  constellWrap: { position: 'relative' },
+  constellBg: {
+    position: 'absolute', left: '10%', right: '10%', top: 17,
+    height: 1, backgroundColor: theme.border,
+  },
+  constellFill: {
+    position: 'absolute', left: '10%', top: 17,
+    height: 1, backgroundColor: theme.accent,
+  },
+  starsRow: { flexDirection: 'row' },
+  starBtn: { flex: 1, alignItems: 'center', paddingVertical: 4 },
 
   intentionInput: {
     fontFamily: fonts.body, fontSize: 14, color: theme.fg,
