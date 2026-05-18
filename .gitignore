@@ -15,3 +15,7 @@ web-build/
 env
 *.env.local
 serviceAccount.json
+
+# Signing credentials
+credentials.json
+android/keystores/
