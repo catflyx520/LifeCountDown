@@ -21,7 +21,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#eadfc3"
       },
-      "package": "com.lifecountdown.app",
+      "package": "com.lifeCounter",
       "edgeToEdgeEnabled": true
     },
     "web": {
