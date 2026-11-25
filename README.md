@@ -18,15 +18,16 @@ npm install
 
 **2. Create `.env`**
 
-Copy `.env.example` to `.env` and fill in your keys:
+Copy `.env.example` to `.env` and fill it in:
 ```bash
 cp .env.example .env
 ```
 
 Then edit `.env`:
-- `EXPO_PUBLIC_GEMINI_API_KEY` — get from [Google AI Studio](https://aistudio.google.com)
-- `EXPO_PUBLIC_ANTHROPIC_API_KEY` — get from [Anthropic Console](https://console.anthropic.com)
-- Firebase keys are already filled in `.env.example`
+- `EXPO_PUBLIC_FIREBASE_*` — your Firebase web config
+- `EXPO_PUBLIC_ESTIMATE_API_URL` — address of the estimate endpoint (optional, see [AI estimate](#ai-estimate-server-side))
+
+Never put an AI API key in an `EXPO_PUBLIC_` variable. Those are compiled into the app and the web page, where anyone can read them.
 
 **3. Start**
 ```bash
@@ -34,6 +35,15 @@ npx expo start
 ```
 
 Scan the QR code with Expo Go on your phone.
+
+## AI estimate (server side)
+
+The quiz asks `api/estimate.mjs` for the estimate. It runs as a Vercel Function and is the only place that holds the Gemini key.
+
+1. In the Vercel project settings, add the environment variable `GEMINI_API_KEY` (no `EXPO_PUBLIC_` prefix), then redeploy.
+2. Set `EXPO_PUBLIC_ESTIMATE_API_URL` to `https://<your-site>/api/estimate` for the web build and for the Android build.
+
+Without the endpoint the app uses its built-in basic estimate.
 
 ## Firebase (seed data)
 

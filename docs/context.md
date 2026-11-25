@@ -1,6 +1,6 @@
 # Development Context
 
-> Claude reads this automatically at session start. Last updated: 2026-05-04.
+> Claude reads this automatically at session start. Last updated: 2026-11-24.
 
 ## Project
 
@@ -11,7 +11,7 @@
 - Complete onboarding flow: Age → Mode → Manual or AI Quiz → Result → Main
 - All 5 tabs: Dashboard, Check-in, Capsule, Community, Settings
 - AnimatedHourglass SVG component
-- AI integration via Gemini (`gemini-2.5-flash`) in QuizScreen
+- AI estimate via Gemini (`gemini-2.5-flash`), called from the server function `api/estimate.mjs`; QuizScreen only sends the answers
 - Full i18n (zh/en) via `useT()` — all screens fully translated including onboarding quotes, Dashboard quotes, Capsule unlock options, Community cohort/streaks
 - AsyncStorage-based local state (`@lifecountdown/user`)
 - Firebase client SDK (`firebase` package), initialized in `src/firebase.ts`
@@ -35,7 +35,7 @@
 ## Firebase setup
 
 - `src/firebase.ts` — initializes from `EXPO_PUBLIC_FIREBASE_*` env vars, exports `db`
-- `.env` has all keys (gitignored) — see `.env.example` for template
+- `.env` has the Firebase config and `EXPO_PUBLIC_ESTIMATE_API_URL` (gitignored) — see `.env.example` for template. No AI keys in `.env`
 - `serviceAccount.json` in project root (gitignored) — admin SDK only, for seed scripts
 - Firestore Security Rules: quotes/figures/app_config are read-only from client
 
@@ -99,7 +99,7 @@ All large serif numbers had `fontSize === lineHeight` which clipped the top. Fix
 
 - EAS CLI installed, logged in
 - `eas.json` created (production profile, `app-bundle`)
-- EAS Secrets uploaded: all 8 `EXPO_PUBLIC_*` env vars
+- EAS Secrets uploaded: all 8 `EXPO_PUBLIC_*` env vars (the two AI key variables must be removed, see "Gemini key moved to the server")
 - Google Play Developer account: ✅ approved
 - AAB build: triggered via `eas build --platform android --profile production` (may be ready)
 - Play Console app created: "Life Counter", store listing partially filled
@@ -130,8 +130,25 @@ Full ceremonial reveal implemented in `src/screens/CapsuleDetailModal.tsx`:
 - **Actions**: "Keep on shelf" closes modal; "Burn the letter" shows `Alert.alert` confirmation then deletes capsule from storage via `onBurn` prop
 - **CapsuleScreen**: unlocked capsule items now tappable (`Pressable`) → opens modal; full `UserData` loaded on focus; `burnCapsule` handler filters + saves + closes modal
 
+## Gemini key moved to the server (2026-11-24)
+
+The Gemini key was readable in the public web bundle because QuizScreen used `EXPO_PUBLIC_GEMINI_API_KEY`. Fixed in code:
+
+- `api/estimate.mjs` — Vercel Function. Holds `GEMINI_API_KEY` (server variable), validates the input, builds the prompt, calls Gemini, limits requests per IP (best effort) and refuses browsers on other sites
+- `src/screens/QuizScreen.tsx` — POSTs the answers to `EXPO_PUBLIC_ESTIMATE_API_URL`; with no URL it uses the basic estimate without an error message
+- `.env.example` added; README and CLAUDE.md no longer tell anyone to put AI keys in `EXPO_PUBLIC_` variables
+- Dependencies: only `shell-quote`, `tar`, `websocket-driver` and `websocket-extensions` were updated. A full `npm audit fix` moves expo to 54.0.38 and the Android release bundle then fails in hermesc. Check any dependency update with `npx expo export:embed --platform android --dev false --entry-file index.ts --bundle-output <file> --assets-dest <dir>` and then run `node_modules/react-native/sdks/hermesc/<platform>/hermesc -emit-binary -out <file>.hbc <file> -O`
+
+Owner follow-up (cannot be done from code):
+
+1. Delete the leaked key in Google AI Studio and create a new one
+2. Vercel: add `GEMINI_API_KEY` (the new key) and `EXPO_PUBLIC_ESTIMATE_API_URL=https://life-count-down.vercel.app/api/estimate`, remove `EXPO_PUBLIC_GEMINI_API_KEY`, redeploy
+3. EAS: remove `EXPO_PUBLIC_GEMINI_API_KEY` and `EXPO_PUBLIC_ANTHROPIC_API_KEY`, add `EXPO_PUBLIC_ESTIMATE_API_URL`, rebuild the AAB
+4. GitHub secret `GEMINI_API_KEY` (weekly quotes workflow): replace it if it was the same key
+
 ## What to do next
 
+0. Finish the owner follow-up in "Gemini key moved to the server"
 1. Community STREAKS and cohort values — replace with real data once Firebase Auth exists
 2. Decide on Firebase Auth (real user accounts) vs staying anonymous
 3. `@anthropic-ai/sdk` in dependencies, not yet wired up

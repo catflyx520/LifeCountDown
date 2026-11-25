@@ -28,12 +28,12 @@ There are no tests. There is no linter configured.
 
 ## Environment
 
-`.env` is gitignored. Set your Gemini key:
+`.env` is gitignored. Copy `.env.example` and fill in the Firebase web config and, optionally, the estimate endpoint:
 ```
-EXPO_PUBLIC_GEMINI_API_KEY=AIza...
+EXPO_PUBLIC_ESTIMATE_API_URL=https://life-count-down.vercel.app/api/estimate
 ```
 
-The `EXPO_PUBLIC_` prefix is required by Expo to expose env vars to the JS bundle. After changing `.env`, always restart with `--clear`.
+The `EXPO_PUBLIC_` prefix exposes a variable to the JS bundle, so anyone can read it in the web page or the APK. **Never put an AI API key in an `EXPO_PUBLIC_` variable.** The Gemini key is a server variable (`GEMINI_API_KEY`, set in the Vercel project) used only by `api/estimate.mjs`. After changing `.env`, always restart with `--clear`.
 
 ## Architecture
 
@@ -82,11 +82,12 @@ Returns live `HH:MM:SS` string counting down to midnight. Used in DashboardScree
 
 **Result summary pages** (both Manual and AI) show: hourglass animation, target age, days/months/years remaining, live midnight countdown, quote or AI feedback.
 
-**AI integration (`src/screens/QuizScreen.tsx`):**
-- Model: `gemini-2.5-flash` via `@google/generative-ai`
-- Prompt includes age, lifestyle answers, optional medical conditions, optional name
-- Returns JSON `{ targetAge, confidence, feedback }` parsed via regex `/{[\s\S]*?}/`
-- Falls back to `targetAge: 82, confidence: 70` on any error
+**AI integration (`src/screens/QuizScreen.tsx` + `api/estimate.mjs`):**
+- The app POSTs age, lifestyle answers, optional medical conditions, optional name and language to `EXPO_PUBLIC_ESTIMATE_API_URL`
+- `api/estimate.mjs` (Vercel Function) validates the input, builds the prompt and calls `gemini-2.5-flash` with the server-only `GEMINI_API_KEY`
+- Returns JSON `{ targetAge, confidence, feedback }`
+- Falls back to `targetAge: 82, confidence: 70` on any error, and silently when no endpoint is configured
+- Do not call an AI provider directly from app code: a key in the bundle is public
 
 **Nested ScrollView on Android:**
 Birthday drum pickers in `AgeScreen` are vertical ScrollViews inside a vertical outer ScrollView. Fix: outer ScrollView has `scrollEnabled={outerScroll}` state; `onTouchStart` on the drum container sets it `false`, `onTouchEnd`/`onTouchCancel` restores it. Also add `nestedScrollEnabled` to each drum ScrollView.
