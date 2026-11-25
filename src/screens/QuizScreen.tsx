@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, Alert, ScrollView, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { Shell, Eyebrow, SerifText, MonoText, Card, Btn } from '../components/UI';
 import { theme, fonts } from '../theme';
 import { RootStackParamList } from '../types';
@@ -13,7 +12,11 @@ import { useT, Lang } from '../i18n';
 
 type Props = { navigation: NativeStackNavigationProp<RootStackParamList, 'Quiz'> };
 
-const API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY ?? '';
+// Address of the server endpoint that asks Gemini for the estimate (see api/estimate.mjs).
+// It is an address, not a secret. Never put an AI API key in an EXPO_PUBLIC_ variable:
+// those are compiled into the app and the web page, where anyone can read them.
+const ESTIMATE_URL = process.env.EXPO_PUBLIC_ESTIMATE_API_URL ?? '';
+const ESTIMATE_NOT_CONFIGURED = 'ESTIMATE_NOT_CONFIGURED';
 
 type Result = {
   targetAge: number;
@@ -82,8 +85,11 @@ export default function QuizScreen({ navigation }: Props) {
       await saveUser({ targetAge: estimate.targetAge, daysLeft, confidence: estimate.confidence, mode: 'ai' });
       setResult({ ...estimate, answers: answersToSubmit, name: nameInput.trim() || user.name || '', daysLeft, fillPct });
     } catch (err: any) {
-      console.error('[QuizScreen] Gemini API error:', err?.message ?? err);
-      Alert.alert('Error', `${err?.message ?? String(err)}\n\nUsing a basic estimate instead.`);
+      // No endpoint configured: use the basic estimate without an error message.
+      if (err?.code !== ESTIMATE_NOT_CONFIGURED) {
+        console.error('[QuizScreen] Estimate error:', err?.message ?? err);
+        Alert.alert('Error', `${err?.message ?? String(err)}\n\nUsing a basic estimate instead.`);
+      }
       const user = await loadUser();
       const targetAge = 82;
       const daysLeft = computeDaysLeft(user.age, targetAge);
@@ -325,47 +331,36 @@ async function estimateLifespan(
   conditions: string,
   lang: Lang,
 ): Promise<{ targetAge: number; confidence: number; feedback: string }> {
-  if (!API_KEY) throw new Error('No Gemini API key');
+  if (!ESTIMATE_URL) {
+    throw Object.assign(new Error('AI estimate is not configured'), { code: ESTIMATE_NOT_CONFIGURED });
+  }
 
-  const genAI = new GoogleGenerativeAI(API_KEY);
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-
-  const conditionsLine = conditions.trim()
-    ? `\nExisting medical conditions: ${conditions.trim()}`
-    : '';
-
-  const nameLine = name.trim() ? `The person's name is ${name.trim()}.` : '';
-  const langInstruction = lang === 'zh'
-    ? 'Write the feedback field in Simplified Chinese.'
-    : 'Write the feedback field in English.';
-
-  const prompt = `You are a life expectancy estimator. ${nameLine} Based on the following lifestyle information, estimate a realistic life expectancy for a person who is currently ${currentAge} years old.
-
-Lifestyle information:
-${answersFormatted.map(a => `- ${a}`).join('\n')}${conditionsLine}
-
-Return ONLY a JSON object with exactly these three fields:
-- targetAge: a whole number between 60 and 105 (the estimated age at death)
-- confidence: a whole number between 55 and 95 (your confidence percentage)
-- feedback: a single sentence (max 30 words) of honest, direct insight — address them by name if provided — about the biggest factor affecting their longevity
-
-${langInstruction}
-
-Example: {"targetAge": 83, "confidence": 78, "feedback": "Alex, your sleep and exercise habits are strong foundations, but daily drinking is the single biggest drag on your estimate."}
-
-Respond with the JSON object only, no other text.`;
-
-  const result = await model.generateContent(prompt);
-  const text = result.response.text();
-
-  const match = text.match(/\{[\s\S]*?\}/);
-  if (!match) throw new Error('No JSON in response');
-  const parsed = JSON.parse(match[0]);
-  return {
-    targetAge: Math.max(60, Math.min(105, Number(parsed.targetAge) || 82)),
-    confidence: Math.max(55, Math.min(95, Number(parsed.confidence) || 75)),
-    feedback: String(parsed.feedback || 'Your lifestyle profile has been analyzed.'),
-  };
+  // The prompt and the Gemini API key live on the server. The app only sends the answers.
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 25000);
+  try {
+    const response = await fetch(ESTIMATE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        age: currentAge,
+        name: name.trim().slice(0, 40),
+        answers: answersFormatted,
+        conditions: conditions.trim().slice(0, 300),
+        lang,
+      }),
+      signal: controller.signal,
+    });
+    if (!response.ok) throw new Error(`Estimate service answered ${response.status}`);
+    const parsed = await response.json();
+    return {
+      targetAge: Math.max(60, Math.min(105, Number(parsed.targetAge) || 82)),
+      confidence: Math.max(55, Math.min(95, Number(parsed.confidence) || 75)),
+      feedback: String(parsed.feedback || 'Your lifestyle profile has been analyzed.'),
+    };
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 const styles = StyleSheet.create({
